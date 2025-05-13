@@ -1,0 +1,27 @@
+# ConTeXt Packaging Scripts
+# https://github.com/gucci-on-fleek/context-packaging
+# SPDX-License-Identifier: CC0-1.0+
+# SPDX-FileCopyrightText: 2025 Max Chernoff
+when:
+  - event:
+      - cron
+      - manual
+    cron: context-daily
+
+clone:
+  - name: Clone the repository
+    image: docker.io/woodpeckerci/plugin-git
+    settings:
+      tags: true
+
+steps:
+  - name: Tag the new version
+    image: maxchernoff.ca/tex:latest
+    pull: true
+    commands:
+      - source ./daily-check.sh
+    environment:
+      GITHUB_USER: "gucci-on-fleek"
+      GITHUB_TOKEN:
+        from_secret: github_token
+

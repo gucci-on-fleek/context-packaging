@@ -1,0 +1,26 @@
+# ConTeXt Packaging Scripts
+# https://github.com/gucci-on-fleek/context-packaging
+# SPDX-License-Identifier: CC0-1.0+
+# SPDX-FileCopyrightText: 2025 Max Chernoff
+when:
+  - event:
+      - tag
+
+steps:
+  - name: Generate the release
+    image: maxchernoff.ca/tex:latest
+    pull: true
+    commands:
+      - source ./make-release.sh
+
+  - name: Release
+    when:
+      event: tag
+    image: docker.io/woodpeckerci/plugin-release
+    settings:
+      overwrite: true
+      files:
+        - context-20*.zip
+      file-exists: overwrite
+      api_key:
+        from_secret: GITHUB_TOKEN
