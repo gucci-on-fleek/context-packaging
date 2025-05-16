@@ -36,7 +36,18 @@ for ctx_platform in "${!platforms[@]}"; do
     cp -a "$source/texmf-$ctx_platform/bin/"* "$output/context.$tl_platform/bin/$tl_platform/"
     ln -sf ../../texmf-dist/scripts/context/lua/context.lua "$output/context.$tl_platform/bin/$tl_platform/context.lua"
     ln -sf ../../texmf-dist/scripts/context/lua/mtxrun.lua "$output/context.$tl_platform/bin/$tl_platform/mtxrun.lua"
+
+    # We don't want to overwrite TL's luatex
+    rm -f "$output/context.$tl_platform/bin/$tl_platform/luatex"
 done
+
+# Convert the macOS binaries to universal
+rm -r "$output/context.universal-darwin/bin/universal-darwin/luametatex"
+
+llvm-lipo -create \
+    -output "$output/context.universal-darwin/bin/universal-darwin/luametatex" \
+    "$source/texmf-osx-64/bin/luametatex" \
+    "$source/texmf-osx-arm64/bin/luametatex"
 
 # texmf-dist/fonts/
 rm -rf "$output/context/texmf-dist/fonts/"
