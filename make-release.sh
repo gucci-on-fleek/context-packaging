@@ -83,9 +83,9 @@ cp -a "$source/texmf-context/colors/icc/context/" "$output/context/texmf-dist/te
 
 # Non-free
 mkdir -p "$output/context-nonfree/texmf-dist/tex/context/fonts/mkiv/"
-mv "$output/context/texmf-dist/tex/context/fonts/mkiv/"*{cambria,lucida,mathtimes,minion,adobe,cleartype,koeiel,osx,mscore}* "$output/context-nonfree/texmf-dist/tex/context/fonts/mkiv/"
-mkdir -p "$output/context-nonfree/texmf-dist/tex/context/colors/"
-cp -a "$source/texmf-context/colors/icc/profiles/" "$output/context-nonfree/texmf-dist/tex/context/colors/"
+mv "$output/context/texmf-dist/tex/context/fonts/mkiv/"*{cambria,koeiel,lucida,mathtimes,minion}*.lfg "$output/context-nonfree/texmf-dist/tex/context/fonts/mkiv/"
+mkdir -p "$output/context-nonfree/texmf-dist/tex/context/colors/profiles/"
+mv "$source/texmf-context/colors/icc/profiles/colo-imp-"{srgb,isocoated_v2_eci}.icc "$output/context-nonfree/texmf-dist/tex/context/colors/profiles/"
 
 # And now we'll zip it all up
 cd "$output/"
