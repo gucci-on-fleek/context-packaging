@@ -19,7 +19,7 @@ steps:
     image: maxchernoff.ca/tex:latest
     pull: true
     commands:
-      - source ./daily-check.sh
+      - source ./scripts/daily-check.sh
     environment:
       GITHUB_USER: "gucci-on-fleek"
       GITHUB_TOKEN:

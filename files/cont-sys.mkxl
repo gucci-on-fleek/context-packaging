@@ -1,0 +1,43 @@
+% ConTeXt Packaging Scripts
+% https://github.com/gucci-on-fleek/context-packaging
+% SPDX-License-Identifier: CC0-1.0+
+% SPDX-FileCopyrightText: 2025 Max Chernoff
+
+% This TeX Live-specific file updates the ConTeXt LMTX filename cache if the
+% system ls-R files are modified (typically by mktexlsr). It also sets the
+% default paper size from the context-papersize.tex file which TeX Live
+% creates/updates (in tlpkg/TLPaper.pm).
+
+\startluacode
+    local addsuffix = file.addsuffix
+    local attributes = lfs.attributes
+    local difftime = os.difftime
+    local file_join = file.join
+    local getfirstreadablefile = caches.getfirstreadablefile
+    local gethashes = resolvers.gethashes
+    local hashed = caches.hashed
+    local ipairs = ipairs
+    local resolve = resolvers.resolve
+
+    local stale = false
+    for _, tree in ipairs(gethashes()) do
+        local lsR_path = file_join(resolve(tree.name), "ls-R")
+        local lsR_time = attributes(lsR_path, "modification")
+
+        local hash = hashed(tree.name)
+        local hash_path = getfirstreadablefile(addsuffix(hash, "lua"), "trees")
+        local hash_time = attributes(hash_path, "modification")
+
+        if lsR_time and hash_time and difftime(lsR_time, hash_time) > 0 then
+            stale = true
+        end
+    end
+
+    if stale then
+        resolvers.renewcache()
+        resolvers.load()
+    end
+\stopluacode
+
+% Set the default paper size
+\readsysfile{context-papersize.tex}{}{}

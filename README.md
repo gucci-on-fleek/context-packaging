@@ -11,6 +11,10 @@ Distribution](https://wiki.contextgarden.net/Introduction/Installation)
 into [TeX Live](https://tug.org/texlive/pkgcontrib.html) and
 [CTAN](https://www.ctan.org/pkg/context).
 
+Note that this project only packages the newer MkIV (LuaTeX) and MkXL
+(LuaMetaTeX) formats; the legacy MkII (pdfTeX and XeTeX) formats are
+packaged by the TeX Live maintainers directly.
+
 ## Architecture
 
 1. [Every
@@ -21,7 +25,7 @@ into [TeX Live](https://tug.org/texlive/pkgcontrib.html) and
 2. Afterwards, [the `daily-check` workflow in this
    repository](.woodpecker/daily-check.yaml) runs. [It extracts the
    version number of the current ConTeXt installation, and then attempts
-   to make a corresponding Git tag.](daily-check.sh) If it fails
+   to make a corresponding Git tag.](scripts/daily-check.sh) If it fails
    (because the tag already exists), it gracefully exits; if it
    succeeds, it [pushes the tag to this
    repository](https://github.com/gucci-on-fleek/context-packaging/tags).
@@ -29,8 +33,8 @@ into [TeX Live](https://tug.org/texlive/pkgcontrib.html) and
 3. Whenever a tag is pushed, [the `make-release` workflow in this
    repository](.woodpecker/make-release.yaml) runs. [It reorganizes and
    zips the contents of the ConTeXt standalone distribution into the
-   format expected by TeX Live.](make-release.sh) Afterwards, [it
-   uploads the `.zip` files into a new GitHub
+   format expected by TeX Live.](scripts/make-release.sh) Afterwards,
+   [it uploads the `.zip` files into a new GitHub
    release](https://github.com/gucci-on-fleek/context-packaging/releases).
 
 4. Whenever a new release is created, GitHub emails me. Then, I will
@@ -41,6 +45,12 @@ into [TeX Live](https://tug.org/texlive/pkgcontrib.html) and
 Note that steps 2 and 3 (where all the important stuff happens) are
 executed on [Woodpecker CI, so the full build logs are publicly
 available](https://woodpecker.maxchernoff.ca/repos/4).
+
+## Files
+
+A few TeX Live-specific files for ConTeXt are contained in the
+[`files/`](files) directory. Check the comments in each file for more
+details.
 
 ## Contributing
 
@@ -61,8 +71,8 @@ are also gladly accepted.
 
 ## Licence
 
-To the extent allowable by law, I disclaim any copyright on the files in
-this repository.
-
-Note that ConTeXt itself is still copyrighted; its licence (mostly GPL
-v2.0) is documented in the `.zip` files.
+The vast majority of files in the zip files originate from ConTeXt
+itself; please see
+[`doc/context/documents/general/manuals/mreadme.pdf`](https://texdoc.org/serve/mreadme/0)
+for details on their licensing. The files directly contained in this
+repository are placed in the public domain.

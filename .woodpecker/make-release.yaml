@@ -11,7 +11,7 @@ steps:
     image: maxchernoff.ca/tex:latest
     pull: true
     commands:
-      - source ./make-release.sh
+      - source ./scripts/make-release.sh
 
   - name: Release
     when:
@@ -20,7 +20,7 @@ steps:
     settings:
       overwrite: true
       files:
-        - context-20*.zip
+        - output/context.ctan.zip
       file-exists: overwrite
       api_key:
         from_secret: GITHUB_TOKEN
