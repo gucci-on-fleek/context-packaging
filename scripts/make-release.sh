@@ -141,8 +141,9 @@ for ctx_platform in "${!context_platforms[@]}"; do
     ln -sf ../../texmf-dist/scripts/context/lua/mtxrun.lua \
         "$staging/context.bin/$tl_platform/mtxrun.lua"
 
-    # We don't want to overwrite TL's luatex
-    rm -f "$staging/context.bin/$tl_platform/luatex"
+    # We don't want to overwrite TL's luatex. With a trailing asterisk to get
+    # the ".exe" for Windows.
+    rm -f "$staging/context.bin/$tl_platform/luatex"*
 done
 
 # Now, let's handle the binaries for the unsupported platforms.
@@ -259,7 +260,7 @@ cp -a "$source/texmf-context/source/luametatex/source/readme.txt" \
 # Move the LuaMetaTeX documents from the ConTeXt folder to the LuaMetaTeX
 # folder.
 find "$staging/context.tds/doc/context/" \
-    \( -not -path '*/presentation/*' \) -iname '*luametatex*' \
+    \( -not -path '*/presentations/*' \) -iname '*luametatex*' \
     -type f -print0 | \
     xargs -0 mv \
     --target-directory="$staging/context.tds/doc/luametatex/base/"
@@ -417,7 +418,7 @@ mv \
 ###############
 
 # Some files have \r\n line endings, so let's fix them up.
-find "$staging/" -type f -print0 | xargs -0 dos2unix --safe
+find "$staging/" -type f -print0 | xargs -0 dos2unix --safe > /dev/null 2>&1
 
 # Remove any empty folders that were created by the packaging script.
 find "$staging/" -type d -empty -delete
@@ -426,6 +427,16 @@ find "$staging/" -type d -empty -delete
 #################
 ### Packaging ###
 #################
+
+# Let's normalize all the permissions.
+chown -R root:root "$staging/"
+chmod -R a=rX,u+w "$staging/"
+find "$staging/context.bin/" \
+    \( -name 'luametatex' -o -name 'luametatex.exe' \) \
+    -type f -print0 | \
+    xargs -0 chmod a+x
+
+chmod a+x "$staging/luametatex.src/build."{sh,cmd}
 
 # Reset the date on all the files in context.bin/ since we can't use
 # add-determinism there.
@@ -437,7 +448,7 @@ cd "$staging/"
 for folder in ./*; do
     folder_name="$(basename "$folder")"
     cd "$staging/$folder_name/"
-    zip --no-dir-entries --strip-extra --symlinks --recurse-paths \
+    zip --quiet --no-dir-entries --strip-extra --symlinks --recurse-paths \
         "$output/$folder_name.zip" ./*
 
     # Make the zip files deterministic
@@ -499,6 +510,9 @@ find "$staging/context.tds/scripts/" \
     xargs -0 cp --backup=numbered \
     --target-directory="$staging/context.ctan/context/scripts/"
 
+cp "$staging/context.tds/web2c/texmfcnf.lua" \
+    "$staging/context.ctan/context/scripts/"
+
 # And the flattened fonts/ tree.
 mkdir -p "$staging/context.ctan/context/fonts/"
 find "$staging/context.tds/fonts/" "$staging/context-nonfree.tds/fonts/" \
@@ -534,7 +548,7 @@ find "$staging/context.ctan/" -type f -name '*.~*~' -delete
 
 # Finally, we can zip up the CTAN archive.
 cd "$staging/context.ctan/"
-zip --no-dir-entries --strip-extra --symlinks --recurse-paths \
+zip --quiet --no-dir-entries --strip-extra --symlinks --recurse-paths \
     "$output/context.ctan.zip" ./*
 cd "$root/"
 
@@ -597,7 +611,8 @@ context --make
 cp -a "/root/make-font-cache/context-cache.tex" \
     "$testing/tests/context-cache.tex"
 
-context context-cache.tex
+context context-cache.tex > /dev/null || \
+    (cat context-cache.log && exit 1)
 
 # And compare the output to the expected output.
 pdftotext -layout -enc UTF-8 context-cache.pdf - \
@@ -620,5 +635,6 @@ rm -rf "${testing:?}/"
 
 # Woodpecker will handle uploading the files to GitHub, but we need to manually
 # upload the files to CTAN here.
-curl --fail --verbose --config "$scripts/ctan-upload.ini" || \
+curl --no-progress-meter --fail --verbose \
+    --config "$scripts/ctan-upload.ini" || \
     (echo "CTAN upload failed: $?" && exit 1)
