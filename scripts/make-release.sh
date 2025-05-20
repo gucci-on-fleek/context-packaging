@@ -87,6 +87,9 @@ output="$root/output/"
 # Where we will place the files used for testing.
 testing="$root/testing/"
 
+# Where the build scripts are located.
+scripts="$root/scripts/"
+
 
 ###############
 ### Folders ###
@@ -94,9 +97,6 @@ testing="$root/testing/"
 
 # The ConTeXt runtime files
 mkdir -p "$staging/context.tds/"
-
-# The ConTeXt Documentation
-mkdir -p "$staging/context.doc/"
 
 # The LuaMetaTeX source code
 mkdir -p "$staging/luametatex.src/"
@@ -206,9 +206,9 @@ mkdir -p "$staging/context.tds/fonts/truetype/public/context/"
 cp -a "$source/texmf/fonts/data/public/cc-icons/cc-icons.ttf" \
     "$staging/context.tds/fonts/truetype/public/context/"
 
-mkdir -p "$staging/context.doc/doc/fonts/context/"
+mkdir -p "$staging/context.tds/doc/fonts/context/"
 mv "$staging/context.tds/fonts/opentype/public/context/readme.txt" \
-    "$staging/context.doc/doc/fonts/context/readme.txt"
+    "$staging/context.tds/doc/fonts/context/readme.txt"
 
 # texmf-context/
 mkdir -p "$staging/context.tds/fonts/truetype/public/context/"
@@ -238,23 +238,43 @@ cp -a \
 # different .tar.xz tlpkg file).
 
 # PDF documentation
-mkdir -p "$staging/context.doc/doc/"
-cp -a "$source/texmf-context/doc/context/" "$staging/context.doc/doc/context/"
+mkdir -p "$staging/context.tds/doc/"
+cp -a "$source/texmf-context/doc/context/" "$staging/context.tds/doc/context/"
 
 # ConTeXt READMEs
 cp -a "$source/texmf-context/context-readme.txt" \
-    "$staging/context.doc/doc/context/README-CONTEXT-DISTRIBUTION.txt"
+    "$staging/context.tds/doc/context/README-CONTEXT-DISTRIBUTION.txt"
 
 cp -a "$packaging/README-PACKAGING.md" \
-    "$staging/context.doc/doc/context/"
+    "$staging/context.tds/doc/context/"
+
+# LuaMetaTeX READMEs
+mkdir -p "$staging/context.tds/doc/luametatex/base/"
+cp -a "$source/texmf-context/source/luametatex/source/readme.txt" \
+    "$staging/context.tds/doc/luametatex/base/README"
+
+cp -a "$source/texmf-context/source/luametatex/source/readme.txt" \
+    "$staging/context.tds/doc/luametatex/base/LICENSE"
+
+# Move the LuaMetaTeX documents from the ConTeXt folder to the LuaMetaTeX
+# folder.
+find "$staging/context.tds/doc/context/" \
+    \( -not -path '*/presentation/*' \) -iname '*luametatex*' \
+    -type f -print0 | \
+    xargs -0 mv \
+    --target-directory="$staging/context.tds/doc/luametatex/base/"
+
+# The LuaTeX manual is already included in TeX Live, so we don't need to copy it
+# over.
+rm -f "$staging/context.tds/doc/context/documents/general/manuals/luatex.pdf"
 
 # Copy the ConTeXt man pages to the TeX Live MANPATH.
-mkdir -p "$staging/context.doc/doc/man/man1/"
+mkdir -p "$staging/context.tds/doc/man/man1/"
 
 cp -a "$source/texmf-context/doc/context/scripts/mkiv/"*.man \
-    "$staging/context.doc/doc/man/man1/"
+    "$staging/context.tds/doc/man/man1/"
 
-prename 's/.man$/.1/' "$staging/context.doc/doc/man/man1/"*
+prename 's/.man$/.1/' "$staging/context.tds/doc/man/man1/"*
 
 
 ###############
@@ -297,14 +317,14 @@ cp -a "$source/texmf-context/tex/generic/context/luatex/" \
 
 # These files belong in the doc/ folder instead.
 mv "$staging/context.tds/tex/context/filenames.tex" \
-    "$staging/context.doc/doc/context/"
+    "$staging/context.tds/doc/context/"
 
 mv "$staging/context.tds/tex/context/base/context.rme" \
-    "$staging/context.doc/doc/context/README.txt"
+    "$staging/context.tds/doc/context/README.txt"
 
-mkdir -p "$staging/context.doc/doc/context/sample/"
+mkdir -p "$staging/context.tds/doc/context/sample/"
 mv "$staging/context.tds/tex/context/sample/third/readme.txt" \
-    "$staging/context.doc/doc/context/sample/"
+    "$staging/context.tds/doc/context/sample/"
 
 # # This folder belongs in the bibtex/bib/ folder, but Karl complained, so we'll
 # # leave it as-is :).
@@ -355,9 +375,9 @@ mkdir -p "$staging/context.tds/tex/context/colors/"
 cp -a "$source/texmf-context/colors/icc/"* \
     "$staging/context.tds/tex/context/colors/"
 
-mkdir -p "$staging/context.doc/doc/context/colors/profiles/"
+mkdir -p "$staging/context.tds/doc/context/colors/profiles/"
 mv "$staging/context.tds/tex/context/colors/profiles/colo-imp-icc.rme" \
-    "$staging/context.doc/doc/context/colors/profiles/README.txt"
+    "$staging/context.tds/doc/context/colors/profiles/README.txt"
 
 # metapost/ is already laid out correctly, so we can just copy it over.
 cp -a "$source/texmf-context/metapost/" \
@@ -430,11 +450,16 @@ done
 cd "$root/"
 
 # Now, we can prepare the CTAN archive. First, let's add the individual zip
-# files, the README.md file, and the VERSION file.
+# files.
 mkdir -p "$staging/context.ctan/context/"
 cp -a "$output/"*.zip \
+    "$staging/context.ctan/context/"
+
+# Move the .tds.zip files to the root of the CTAN archive.
+mv "$staging/context.ctan/context/"*.tds.zip \
     "$staging/context.ctan/"
 
+# Now, we'll add the README.md file and the VERSION file.
 cp -a "$root/README.md" \
     "$staging/context.ctan/context/README.md"
 
@@ -462,7 +487,7 @@ find "$staging/context.tds/tex/" "$staging/context-nonfree.tds/tex/" \
 
 # And the flattened doc/ tree.
 mkdir -p "$staging/context.ctan/context/doc/"
-find "$staging/context.doc/doc/" "$staging/context-nonfree.tds/doc/" \
+find "$staging/context.tds/doc/" "$staging/context-nonfree.tds/doc/" \
     -type f \( -iname '*.pdf' -o -iname '*.html' \) -print0 | \
     xargs -0 cp --backup=numbered \
     --target-directory="$staging/context.ctan/context/doc/"
@@ -488,16 +513,15 @@ find "$staging/context.tds/metapost/" \
     xargs -0 cp --backup=numbered \
     --target-directory="$staging/context.ctan/context/metapost/"
 
-# Copy over the support files for the binaries (but not the binaries, yet).
+# And the flattened LuaMetaTeX source.
+mkdir -p "$staging/context.ctan/context/source/"
+find "$staging/luametatex.src/" \
+    -type f \( -iname '*.c' -o -iname '*.h' \) -print0 | \
+    xargs -0 cp --backup=numbered \
+    --target-directory="$staging/context.ctan/context/source/"
+
+# And the binaries.
 mkdir -p "$staging/context.ctan/context/bin/"
-
-cp -a "$staging/context.bin/windows/"* "$staging/context.ctan/context/bin/"
-rm -f "$staging/context.ctan/context/bin/luametatex.exe"
-
-cp -af "$staging/context.bin/x86_64-linux/"* "$staging/context.ctan/context/bin/"
-rm -f "$staging/context.ctan/context/bin/luametatex"
-
-# And the binaries themselves.
 for tl_platform in "${context_platforms[@]}" "${luametatex_platforms[@]}"; do
     # Trailing asterisk to get the ".exe" for Windows.
     cp -a "$staging/context.bin/$tl_platform/luametatex"* \
@@ -508,15 +532,14 @@ done
 # just-created" error, so now we'll remove all of the numbered backup files.
 find "$staging/context.ctan/" -type f -name '*.~*~' -delete
 
-# Make the CTAN zip file deterministic as well.
-find "$staging/context.ctan/" -print0 | \
-    xargs -0 touch --no-dereference --date="@$SOURCE_DATE_EPOCH"
-
 # Finally, we can zip up the CTAN archive.
 cd "$staging/context.ctan/"
 zip --no-dir-entries --strip-extra --symlinks --recurse-paths \
     "$output/context.ctan.zip" ./*
 cd "$root/"
+
+# Make the CTAN zip file deterministic as well.
+add-determinism "$output/context.ctan.zip"
 
 # Clean up by removing the staging folder.
 cp "$staging/context.ctan/context/VERSION" "$output/version.txt"
@@ -597,5 +620,5 @@ rm -rf "${testing:?}/"
 
 # Woodpecker will handle uploading the files to GitHub, but we need to manually
 # upload the files to CTAN here.
-curl --fail --verbose --config "$packaging/ctan-upload.ini" || \
+curl --fail --verbose --config "$scripts/ctan-upload.ini" || \
     (echo "CTAN upload failed: $?" && exit 1)
