@@ -431,82 +431,86 @@ cd "$root/"
 
 # Now, we can prepare the CTAN archive. First, let's add the individual zip
 # files, the README.md file, and the VERSION file.
-mkdir -p "$staging/context.ctan/"
+mkdir -p "$staging/context.ctan/context/"
 cp -a "$output/"*.zip \
     "$staging/context.ctan/"
 
 cp -a "$root/README.md" \
-    "$staging/context.ctan/README.md"
+    "$staging/context.ctan/context/README.md"
 
-echo "$pretty_version" > "$staging/context.ctan/VERSION"
+echo "$pretty_version" > "$staging/context.ctan/context/VERSION"
 
 # Next, we'll add the flattened tex/ tree.
-mkdir -p "$staging/context.ctan/tex/mkiv/"
+mkdir -p "$staging/context.ctan/context/tex/mkiv/"
 find "$staging/context.tds/tex/" "$staging/context-nonfree.tds/tex/" \
     -type f -path '*/mkiv/*' -print0 | \
     xargs -0 cp --backup=numbered \
-    --target-directory="$staging/context.ctan/tex/mkiv/"
+    --target-directory="$staging/context.ctan/context/tex/mkiv/"
 
-mkdir -p "$staging/context.ctan/tex/mkxl/"
+mkdir -p "$staging/context.ctan/context/tex/mkxl/"
 find "$staging/context.tds/tex/" "$staging/context-nonfree.tds/tex/" \
     -type f -path '*/mkxl/*' -print0 | \
     xargs -0 cp --backup=numbered \
-    --target-directory="$staging/context.ctan/tex/mkxl/"
+    --target-directory="$staging/context.ctan/context/tex/mkxl/"
 
-mkdir -p "$staging/context.ctan/tex/misc/"
+mkdir -p "$staging/context.ctan/context/tex/misc/"
 find "$staging/context.tds/tex/" "$staging/context-nonfree.tds/tex/" \
     \( -not -path '*/mkiv/*' \) -a \( -not -path '*/mkxl/*' \) \
     -type f  -print0 | \
     xargs -0 cp --backup=numbered \
-    --target-directory="$staging/context.ctan/tex/misc/"
+    --target-directory="$staging/context.ctan/context/tex/misc/"
 
 # And the flattened doc/ tree.
-mkdir -p "$staging/context.ctan/doc/"
+mkdir -p "$staging/context.ctan/context/doc/"
 find "$staging/context.doc/doc/" "$staging/context-nonfree.tds/doc/" \
     -type f \( -iname '*.pdf' -o -iname '*.html' \) -print0 | \
     xargs -0 cp --backup=numbered \
-    --target-directory="$staging/context.ctan/doc/"
+    --target-directory="$staging/context.ctan/context/doc/"
 
 # And the flattened scripts/ tree.
-mkdir -p "$staging/context.ctan/scripts/"
+mkdir -p "$staging/context.ctan/context/scripts/"
 find "$staging/context.tds/scripts/" \
     -type f -print0 | \
     xargs -0 cp --backup=numbered \
-    --target-directory="$staging/context.ctan/scripts/"
+    --target-directory="$staging/context.ctan/context/scripts/"
 
 # And the flattened fonts/ tree.
-mkdir -p "$staging/context.ctan/fonts/"
+mkdir -p "$staging/context.ctan/context/fonts/"
 find "$staging/context.tds/fonts/" "$staging/context-nonfree.tds/fonts/" \
     -type f -print0 | \
     xargs -0 cp --backup=numbered \
-    --target-directory="$staging/context.ctan/fonts/"
+    --target-directory="$staging/context.ctan/context/fonts/"
 
 # And the flattened metapost/ tree.
-mkdir -p "$staging/context.ctan/metapost/"
+mkdir -p "$staging/context.ctan/context/metapost/"
 find "$staging/context.tds/metapost/" \
     -type f -print0 | \
     xargs -0 cp --backup=numbered \
-    --target-directory="$staging/context.ctan/metapost/"
+    --target-directory="$staging/context.ctan/context/metapost/"
 
 # Copy over the support files for the binaries (but not the binaries, yet).
-mkdir -p "$staging/context.ctan/bin/"
+mkdir -p "$staging/context.ctan/context/bin/"
 
-cp -a "$staging/context.bin/windows/"* "$staging/context.ctan/bin/"
-rm -f "$staging/context.ctan/bin/luametatex.exe"
+cp -a "$staging/context.bin/windows/"* "$staging/context.ctan/context/bin/"
+rm -f "$staging/context.ctan/context/bin/luametatex.exe"
 
-cp -af "$staging/context.bin/x86_64-linux/"* "$staging/context.ctan/bin/"
-rm -f "$staging/context.ctan/bin/luametatex"
+cp -af "$staging/context.bin/x86_64-linux/"* "$staging/context.ctan/context/bin/"
+rm -f "$staging/context.ctan/context/bin/luametatex"
 
 # And the binaries themselves.
 for tl_platform in "${context_platforms[@]}" "${luametatex_platforms[@]}"; do
     # Trailing asterisk to get the ".exe" for Windows.
     cp -a "$staging/context.bin/$tl_platform/luametatex"* \
-        "$staging/context.ctan/bin/luametatex-$tl_platform"
+        "$staging/context.ctan/context/bin/luametatex-$tl_platform"
 done
 
 # We needed the "--backup=numbered" flag to avoid the "cp: will not overwrite
 # just-created" error, so now we'll remove all of the numbered backup files.
 find "$staging/context.ctan/" -type f -name '*.~*~' -delete
+
+# Make the CTAN zip file deterministic as well.
+find "$staging/context.ctan/" -print0 | \
+    xargs -0 touch --no-dereference --date="@$SOURCE_DATE_EPOCH"
 
 # Finally, we can zip up the CTAN archive.
 cd "$staging/context.ctan/"
@@ -514,11 +518,8 @@ zip --no-dir-entries --strip-extra --symlinks --recurse-paths \
     "$output/context.ctan.zip" ./*
 cd "$root/"
 
-# Make the CTAN zip file deterministic as well.
-add-determinism "$output/context.ctan.zip"
-
 # Clean up by removing the staging folder.
-cp "$staging/context.ctan/VERSION" "$output/version.txt"
+cp "$staging/context.ctan/context/VERSION" "$output/version.txt"
 rm -rf "${staging:?}/"
 
 
@@ -596,5 +597,5 @@ rm -rf "${testing:?}/"
 
 # Woodpecker will handle uploading the files to GitHub, but we need to manually
 # upload the files to CTAN here.
-
-# TODO!
+curl --fail --verbose --config "$packaging/ctan-upload.ini" || \
+    (echo "CTAN upload failed: $?")
