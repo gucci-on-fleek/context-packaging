@@ -66,7 +66,7 @@ missing_platforms=(
     "i386-netbsd"  # Not built by the Build Farm
     "i386-solaris"   # Build Farm gives 403 Forbidden
     "x86_64-cygwin"  # Not built by the Build Farm
-    "x86_64-solaris"  # Not built by the Build Farm
+    "x86_64-solaris"  # Build Farm gives 403 Forbidden
 )
 
 # This is the root of the Woodpecker CI job.
@@ -604,8 +604,8 @@ mkdir -p "$testing/tests/"
 cd "$testing/tests/"
 
 export PATH="$testing/bin/x86_64-linux/:/usr/bin/"
-mtxrun --generate
-context --make
+mtxrun --generate > /dev/null
+context --make > /dev/null
 
 # Finally, we'll run ConTeXt on a test file.
 cp -a "/root/make-font-cache/context-cache.tex" \
