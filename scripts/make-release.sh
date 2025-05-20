@@ -598,4 +598,4 @@ rm -rf "${testing:?}/"
 # Woodpecker will handle uploading the files to GitHub, but we need to manually
 # upload the files to CTAN here.
 curl --fail --verbose --config "$packaging/ctan-upload.ini" || \
-    (echo "CTAN upload failed: $?")
+    (echo "CTAN upload failed: $?" && exit 1)

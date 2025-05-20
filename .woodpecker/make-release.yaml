@@ -7,13 +7,13 @@ when:
       - tag
 
 steps:
-  - name: Generate the release
+  - name: Generate the release and upload to CTAN
     image: maxchernoff.ca/tex:latest
     pull: true
     commands:
       - source ./scripts/make-release.sh
 
-  - name: Release
+  - name: Upload the release to GitHub
     when:
         event: tag
     image: docker.io/woodpeckerci/plugin-release
