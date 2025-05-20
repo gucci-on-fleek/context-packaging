@@ -10,8 +10,25 @@ set -euxo pipefail
 ### Variables ###
 #################
 
-# The version of ConTeXt that we're packaging.
-version="$(git describe --exact-match --tags)"
+# The version of ConTeXt that we're packaging, with no spaces or colons.
+safe_version="$(git describe --exact-match --tags)"
+
+# The version of ConTeXt that we're packaging, with spaces and colons.
+pretty_version="$(\
+    echo "$safe_version" | \
+    sed -E 's/([[:digit:]]{4})-([[:digit:]]{2})-([[:digit:]]{2})-([[:digit:]]{2})-([[:digit:]]{2})/\1-\2-\3 \4:\5/'\
+)"
+
+# Set the date to use for all further operations
+SOURCE_DATE_EPOCH="$(\
+    date --date="TZ=\"Europe/Amsterdam\" $pretty_version" '+%s'\
+)"
+export SOURCE_DATE_EPOCH
+export FORCE_SOURCE_DATE=1
+
+# Force the locale to C.UTF-8
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
 
 # The ConTeXt standalone distribution is updated daily on the server, and it is
 # bind-mounted into this container at this path.
@@ -20,9 +37,12 @@ source="/opt/context/"
 # A mapping from the ConTeXt platform names to TeX Live platform names.
 declare -A context_platforms=(
     ["freebsd-amd64"]="amd64-freebsd"
-    ["linux"]="i386-linux"
     ["linux-64"]="x86_64-linux"
+    ["linux"]="i386-linux"
     ["linuxmusl-64"]="x86_64-linuxmusl"
+    ["openbsd-amd64"]="amd64-openbsd73" # Officially supported by ConTeXt, but
+                                        # not by TeX Live. We'll include it
+                                        # anyways for CTAN.
     ["osx-64"]="x86_64-darwinlegacy"
     ["osx-arm64"]="universal-darwin"
     ["win64"]="windows"
@@ -44,7 +64,6 @@ missing_platforms=(
     "i386-solaris"   # Build Farm gives 403 Forbidden
     "x86_64-cygwin"  # Not built by the Build Farm
     "x86_64-solaris"  # Not built by the Build Farm
-    "amd64-openbsd73"  # Officially supported by ConTeXt, but not by TeX Live
 )
 
 # This is the root of the Woodpecker CI job.
@@ -77,7 +96,7 @@ mkdir -p "$staging/context.doc/"
 mkdir -p "$staging/luametatex.src/"
 
 # The non-free (but freely redistributable) ConTeXt files
-mkdir -p "$staging/context-nonfree/"
+mkdir -p "$staging/context-nonfree.tds/"
 
 # Create folders for each platform in a separate binaries tree.
 for tl_platform in "${context_platforms[@]}" "${luametatex_platforms[@]}"; do
@@ -148,6 +167,11 @@ llvm-lipo -create \
     "$source/texmf-osx-64/bin/luametatex" \
     "$source/texmf-osx-arm64/bin/luametatex"
 
+# The ConTeXt Standalone Distribution is missing the symlinks for Windows, so
+# let's add them now.
+ln -s "./luametatex.exe" "$staging/context.bin/windows/mtxrun.exe" || true
+ln -s "./luametatex.exe" "$staging/context.bin/windows/context.exe" || true
+
 
 #############
 ### Fonts ###
@@ -170,7 +194,7 @@ cp -a "$source/texmf/fonts/data/cms/companion/" \
     "$staging/context.tds/fonts/opentype/public/context/"
 
 mkdir -p "$staging/context.tds/fonts/truetype/public/context/"
-cp -a "$source/texmf/fonts/data/public/cc-icons/" \
+cp -a "$source/texmf/fonts/data/public/cc-icons/cc-icons.ttf" \
     "$staging/context.tds/fonts/truetype/public/context/"
 
 mkdir -p "$staging/context.doc/doc/fonts/context/"
@@ -184,15 +208,15 @@ cp -a \
     "$staging/context.tds/fonts/truetype/public/context/"
 
 # Non-free
-mkdir -p "$staging/context-nonfree/fonts/truetype/public/context/"
+mkdir -p "$staging/context-nonfree.tds/fonts/truetype/public/context/"
 cp -a \
     "$source/texmf-context/fonts/truetype/hoekwater/koeieletters/koeielettersot.ttf" \
-    "$staging/context-nonfree/fonts/truetype/public/context/"
+    "$staging/context-nonfree.tds/fonts/truetype/public/context/"
 
-mkdir -p "$staging/context-nonfree/doc/fonts/context/"
+mkdir -p "$staging/context-nonfree.tds/doc/fonts/context/"
 cp -a \
     "$source/texmf-context/doc/fonts/hoekwater/koeieletters/koeieletters.rme" \
-    "$staging/context-nonfree/doc/fonts/context/koeielettersot.txt"
+    "$staging/context-nonfree.tds/doc/fonts/context/koeielettersot.txt"
 
 
 #####################
@@ -322,6 +346,10 @@ mkdir -p "$staging/context.tds/tex/context/colors/"
 cp -a "$source/texmf-context/colors/icc/"* \
     "$staging/context.tds/tex/context/colors/"
 
+mkdir -p "$staging/context.doc/doc/context/colors/profiles/"
+mv "$staging/context.tds/tex/context/colors/profiles/colo-imp-icc.rme" \
+    "$staging/context.doc/doc/context/colors/profiles/README.txt"
+
 # metapost/ is already laid out correctly, so we can just copy it over.
 cp -a "$source/texmf-context/metapost/" \
     "$staging/context.tds/metapost/"
@@ -342,17 +370,17 @@ cp -a "$packaging/texmfcnf.lua" \
 # redistributable, so they are included in the tlcontrib repository.
 
 # These two colour profiles have unclear licenses
-mkdir -p "$staging/context-nonfree/tex/context/colors/profiles/"
+mkdir -p "$staging/context-nonfree.tds/tex/context/colors/profiles/"
 mv \
     "$staging/context.tds/tex/context/colors/profiles/colo-imp-"{srgb,isocoated_v2_eci}.icc \
-    "$staging/context-nonfree/tex/context/colors/profiles/"
+    "$staging/context-nonfree.tds/tex/context/colors/profiles/"
 
 # These Lua Font Goodie files are themselves free, but they exist only to
 # support non-free fonts, so we'll move them to the non-free folder.
-mkdir -p "$staging/context-nonfree/tex/context/fonts/mkiv/"
+mkdir -p "$staging/context-nonfree.tds/tex/context/fonts/mkiv/"
 mv \
     "$staging/context.tds/tex/context/fonts/mkiv/"*{cambria,koeiel,lucida,mathtimes,minion}*.lfg \
-    "$staging/context-nonfree/tex/context/fonts/mkiv/"
+    "$staging/context-nonfree.tds/tex/context/fonts/mkiv/"
 
 
 ###############
@@ -380,7 +408,10 @@ for folder in ./*; do
 done
 cd "$root/"
 
-# Now, we can prepare the CTAN archive. THis consists of all the individual zip
+# Make the zip files deterministic
+add-determinism "$output/"*.zip
+
+# Now, we can prepare the CTAN archive. First, let's add the individual zip
 # files, the README.md file, and the VERSION file.
 mkdir -p "$staging/context.ctan/"
 cp -a "$output/"*.zip \
@@ -389,7 +420,75 @@ cp -a "$output/"*.zip \
 cp -a "$root/README.md" \
     "$staging/context.ctan/README.md"
 
-echo "$version" > "$staging/context.ctan/VERSION"
+echo "$pretty_version" > "$staging/context.ctan/VERSION"
+
+# Next, we'll add the flattened tex/ tree.
+mkdir -p "$staging/context.ctan/tex/mkiv/"
+find "$staging/context.tds/tex/" "$staging/context-nonfree.tds/tex/" \
+    -type f -path '*/mkiv/*' -print0 | \
+    xargs -0 cp --backup=numbered \
+    --target-directory="$staging/context.ctan/tex/mkiv/"
+
+mkdir -p "$staging/context.ctan/tex/mkxl/"
+find "$staging/context.tds/tex/" "$staging/context-nonfree.tds/tex/" \
+    -type f -path '*/mkxl/*' -print0 | \
+    xargs -0 cp --backup=numbered \
+    --target-directory="$staging/context.ctan/tex/mkxl/"
+
+mkdir -p "$staging/context.ctan/tex/misc/"
+find "$staging/context.tds/tex/" "$staging/context-nonfree.tds/tex/" \
+    \( -not -path '*/mkiv/*' \) -a \( -not -path '*/mkxl/*' \) \
+    -type f  -print0 | \
+    xargs -0 cp --backup=numbered \
+    --target-directory="$staging/context.ctan/tex/misc/"
+
+# And the flattened doc/ tree.
+mkdir -p "$staging/context.ctan/doc/"
+find "$staging/context.doc/doc/" "$staging/context-nonfree.tds/doc/" \
+    -type f \( -iname '*.pdf' -o -iname '*.html' \) -print0 | \
+    xargs -0 cp --backup=numbered \
+    --target-directory="$staging/context.ctan/doc/"
+
+# And the flattened scripts/ tree.
+mkdir -p "$staging/context.ctan/scripts/"
+find "$staging/context.tds/scripts/" \
+    -type f -print0 | \
+    xargs -0 cp --backup=numbered \
+    --target-directory="$staging/context.ctan/scripts/"
+
+# And the flattened fonts/ tree.
+mkdir -p "$staging/context.ctan/fonts/"
+find "$staging/context.tds/fonts/" "$staging/context-nonfree.tds/fonts/" \
+    -type f -print0 | \
+    xargs -0 cp --backup=numbered \
+    --target-directory="$staging/context.ctan/fonts/"
+
+# And the flattened metapost/ tree.
+mkdir -p "$staging/context.ctan/metapost/"
+find "$staging/context.tds/metapost/" \
+    -type f -print0 | \
+    xargs -0 cp --backup=numbered \
+    --target-directory="$staging/context.ctan/metapost/"
+
+# Copy over the support files for the binaries (but not the binaries, yet).
+mkdir -p "$staging/context.ctan/bin/"
+
+cp -a "$staging/context.bin/windows/"* "$staging/context.ctan/bin/"
+rm -f "$staging/context.ctan/bin/luametatex.exe"
+
+cp -af "$staging/context.bin/x86_64-linux/"* "$staging/context.ctan/bin/"
+rm -f "$staging/context.ctan/bin/luametatex"
+
+# And the binaries themselves.
+for tl_platform in "${context_platforms[@]}" "${luametatex_platforms[@]}"; do
+    # Trailing asterisk to get the ".exe" for Windows.
+    cp -a "$staging/context.bin/$tl_platform/luametatex"* \
+        "$staging/context.ctan/bin/luametatex-$tl_platform"
+done
+
+# We needed the "--backup=numbered" flag to avoid the "cp: will not overwrite
+# just-created" error, so now we'll remove all of the numbered backup files.
+find "$staging/context.ctan/" -type f -name '*.~*~' -delete
 
 # Finally, we can zip up the CTAN archive.
 cd "$staging/context.ctan/"
@@ -397,6 +496,11 @@ zip --no-dir-entries --strip-extra --symlinks --recurse-paths \
     "$output/context.ctan.zip" ./*
 cd "$root/"
 
+# Make the CTAN zip file deterministic
+add-determinism "$output/context.ctan.zip"
+
+# Clean up by removing the staging folder.
+rm -rf "${staging:?}/"
 
 ###############
 ### Testing ###

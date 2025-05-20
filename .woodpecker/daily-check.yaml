@@ -12,7 +12,7 @@ clone:
   - name: Clone the repository
     image: docker.io/woodpeckerci/plugin-git
     settings:
-      tags: true
+        tags: true
 
 steps:
   - name: Tag the new version
@@ -21,7 +21,7 @@ steps:
     commands:
       - source ./scripts/daily-check.sh
     environment:
-      GITHUB_USER: "gucci-on-fleek"
-      GITHUB_TOKEN:
-        from_secret: github_token
+        GITHUB_USER: "gucci-on-fleek"
+        GITHUB_TOKEN:
+            from_secret: github_token
 

@@ -31,14 +31,14 @@ if os.type == "windows" then
         home:AppData/Local/Microsoft/Windows/Fonts;\z
         C:/Windows/Fonts;\z
     "
-    nontex_colors = "" -- No idea where this is on Windows
+    nontex_colors = "" -- No idea where this is on Windows; patches welcome
 elseif os.name == "macosx" then
     nontex_fonts = "\z
         home:Library/Fonts;\z
         /Library/Fonts;\z
         /System/Library/Fonts;\z
     "
-    nontex_colors = "" -- No idea where this is on macOS
+    nontex_colors = "" -- No idea where this is on macOS; patches welcome
 else -- Linux, BSD, etc.
     nontex_fonts = "\z
         home:.local/share/fonts;\z
