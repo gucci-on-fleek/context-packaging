@@ -29,3 +29,27 @@ steps:
         file-exists: fail
         api_key:
             from_secret: GITHUB_TOKEN
+
+  - name: Email on failure
+    image: docker.io/deblan/woodpecker-email:latest
+    when:
+        status:
+          - failure
+    settings:
+        level: failure
+        dsn:
+            from_secret: EMAIL_DSN
+        from:
+            address: "woodpecker@noreply.maxchernoff.ca"
+        recipients:
+          - "server-status@maxchernoff.ca"
+        recipients_only: true
+        content:
+            subject: >
+                [{{ pipeline.status }}]
+                {{ repo.full_name }}
+                ({{ commit.branch }} - {{ commit.sha[0:8] }})"
+            body: |
+                {{ commit.sha }}<br>
+                {{ pipeline.status }}<br>
+                {{ commit.author_email }}<br>
