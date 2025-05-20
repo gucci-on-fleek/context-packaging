@@ -34,6 +34,9 @@ export LANG=C.UTF-8
 # bind-mounted into this container at this path.
 source="/opt/context/"
 
+# An installation of TeX Live is bind-mounted into this container at this path.
+texlive="/opt/texlive/"
+
 # A mapping from the ConTeXt platform names to TeX Live platform names.
 declare -A context_platforms=(
     ["freebsd-amd64"]="amd64-freebsd"
@@ -81,6 +84,9 @@ staging="$root/staging/"
 # release.
 output="$root/output/"
 
+# Where we will place the files used for testing.
+testing="$root/testing/"
+
 
 ###############
 ### Folders ###
@@ -105,6 +111,9 @@ done
 
 # The output folder is where we'll place the final zip files.
 mkdir -p "$output/"
+
+# The testing folder is where we'll place the files used for testing.
+mkdir -p "$testing/"
 
 
 ################
@@ -398,18 +407,27 @@ find "$staging/" -type d -empty -delete
 ### Packaging ###
 #################
 
-# First, we'll zip up every tree individually.
+# Reset the date on all the files in context.bin/ since we can't use
+# add-determinism there.
+find "$staging/context.bin/" -print0 | \
+    xargs -0 touch --no-dereference --date="@$SOURCE_DATE_EPOCH"
+
+# Now, we'll zip up every tree individually.
 cd "$staging/"
 for folder in ./*; do
     folder_name="$(basename "$folder")"
     cd "$staging/$folder_name/"
     zip --no-dir-entries --strip-extra --symlinks --recurse-paths \
         "$output/$folder_name.zip" ./*
+
+    # Make the zip files deterministic
+    if [ "$folder_name" != "context.bin" ]; then
+        # add-determinism breaks the symlinks, so only run it on the zips that
+        # don't contain any symlinks.
+        add-determinism "$output/$folder_name.zip"
+    fi
 done
 cd "$root/"
-
-# Make the zip files deterministic
-add-determinism "$output/"*.zip
 
 # Now, we can prepare the CTAN archive. First, let's add the individual zip
 # files, the README.md file, and the VERSION file.
@@ -496,11 +514,13 @@ zip --no-dir-entries --strip-extra --symlinks --recurse-paths \
     "$output/context.ctan.zip" ./*
 cd "$root/"
 
-# Make the CTAN zip file deterministic
+# Make the CTAN zip file deterministic as well.
 add-determinism "$output/context.ctan.zip"
 
 # Clean up by removing the staging folder.
+cp "$staging/context.ctan/VERSION" "$output/version.txt"
 rm -rf "${staging:?}/"
+
 
 ###############
 ### Testing ###
@@ -508,4 +528,73 @@ rm -rf "${staging:?}/"
 
 # Now, let's validate that we generated a functioning ConTeXt package.
 
-# (TODO!)
+# First, we'll unzip the binaries.
+mkdir -p "$testing/bin/"
+cd "$testing/bin/"
+
+cp -a "$output/context.bin.zip" ./
+unzip -q context.bin.zip
+
+rm -f context.bin.zip
+cd "$root/"
+
+# Now, we'll unzip the TEXMF tree.
+mkdir -p "$testing/texmf-dist/"
+cd "$testing/texmf-dist/"
+
+cp -a "$output/context.tds.zip" ./
+unzip -q context.tds.zip
+
+rm -f context.tds.zip
+cd "$root/"
+
+# And copy over some fonts for testing.
+mkdir -p "$testing/texmf-dist/fonts/opentype/public/"
+cp -a "$texlive/texmf-dist/fonts/opentype/public/"{lm,lm-math,tex-gyre,tex-gyre-math,libertinus-fonts,stix2-otf}/ \
+    "$testing/texmf-dist/fonts/opentype/public/"
+
+mkdir -p "$testing/texmf-dist/fonts/opentype/ibm/"
+cp -a "$texlive/texmf-dist/fonts/opentype/ibm/plex/" \
+    "$testing/texmf-dist/fonts/opentype/ibm/"
+
+mkdir -p "$testing/texmf-dist/fonts/truetype/public/"
+cp -a "$texlive/texmf-dist/fonts/truetype/public/dejavu/" \
+    "$testing/texmf-dist/fonts/truetype/public/"
+
+# Next, we'll build the formats.
+mkdir -p "$testing/tests/"
+cd "$testing/tests/"
+
+export PATH="$testing/bin/x86_64-linux/:/usr/bin/"
+mtxrun --generate
+context --make
+
+# Finally, we'll run ConTeXt on a test file.
+cp -a "/root/make-font-cache/context-cache.tex" \
+    "$testing/tests/context-cache.tex"
+
+context context-cache.tex
+
+# And compare the output to the expected output.
+pdftotext -layout -enc UTF-8 context-cache.pdf - \
+    | sed -zE 's/([[:space:]]){2,}/\1/g' | tr '\f' '\n' \
+    > "$testing/tests/context-cache.txt"
+
+git diff --no-index --ignore-all-space --exit-code \
+    "$packaging/context-cache.txt" \
+    "$testing/tests/context-cache.txt" \
+    || (echo "The test failed!" && exit 1)
+
+# We're done, so let's clean up.
+cd "$root/"
+rm -rf "${testing:?}/"
+
+
+#################
+### Uploading ###
+#################
+
+# Woodpecker will handle uploading the files to GitHub, but we need to manually
+# upload the files to CTAN here.
+
+# TODO!
