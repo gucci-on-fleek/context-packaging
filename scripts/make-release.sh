@@ -55,18 +55,19 @@ declare -A context_platforms=(
 # ConTeXt Build Farm builds binaries for them, so we can manually add them here.
 luametatex_platforms=(
     "aarch64-linux"
+    "armhf-linux"
     "i386-freebsd"
+    "i386-solaris"
+    "sparc-solaris"  # Built by the Build Farm, but not supported by TeX Live.
+    "x86_64-solaris"
 )
 
 # No binaries for these platforms unfortunately.
 # shellcheck disable=SC2034
 missing_platforms=(
     "amd64-netbsd"  # ConTeXt Build Farm builder is broken
-    "armhf-linux"  # Build Farm gives 403 Forbidden
     "i386-netbsd"  # Not built by the Build Farm
-    "i386-solaris"   # Build Farm gives 403 Forbidden
     "x86_64-cygwin"  # Not built by the Build Farm
-    "x86_64-solaris"  # Build Farm gives 403 Forbidden
 )
 
 # This is the root of the Woodpecker CI job.
@@ -242,12 +243,22 @@ cp -a \
 mkdir -p "$staging/context.tds/doc/"
 cp -a "$source/texmf-context/doc/context/" "$staging/context.tds/doc/context/"
 
+# These PDF files only contain ASCII characters, so we'll append a null byte to
+# them so that dos2unix doesn't mangle them.
+for pdf_file in "$staging/context.tds/doc/context/sources/general/manuals/start/graphics/fig-page-"*.pdf; do
+    # Append a null byte to the end of the file.
+    printf '%%\0\n' >> "$pdf_file"
+done
+
 # ConTeXt READMEs
 cp -a "$source/texmf-context/context-readme.txt" \
     "$staging/context.tds/doc/context/README-CONTEXT-DISTRIBUTION.txt"
 
 cp -a "$packaging/README-PACKAGING.md" \
     "$staging/context.tds/doc/context/"
+
+# ConTeXt VERSION file
+echo "$pretty_version" > "$staging/context.tds/doc/context/VERSION"
 
 # LuaMetaTeX READMEs
 mkdir -p "$staging/context.tds/doc/luametatex/base/"
