@@ -26,6 +26,7 @@ steps:
           - ./output/context.tds.zip
           - ./output/context.bin.zip
           - ./output/context-nonfree.tds.zip
+          - ./output/context-legacy.tds.zip
         file-exists: fail
         api_key:
             from_secret: GITHUB_TOKEN

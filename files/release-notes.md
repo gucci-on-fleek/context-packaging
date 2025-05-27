@@ -20,3 +20,7 @@
   optionally be used with ConTeXt. This is not included in the standard
   TeX Live distribution, but can be installed by unpacking it into a
   TEXMF tree.
+
+- `context-legacy.tds.zip` is the TDS-compliant archive that contains
+  all the runtime files used by the now-obsolete MkII version of
+  ConTeXt.

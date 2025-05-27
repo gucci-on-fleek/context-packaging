@@ -10,22 +10,6 @@ set -euxo pipefail
 ### Variables ###
 #################
 
-# The version of ConTeXt that we're packaging, with no spaces or colons.
-safe_version="$(git describe --exact-match --tags)"
-
-# The version of ConTeXt that we're packaging, with spaces and colons.
-pretty_version="$(\
-    echo "$safe_version" | \
-    sed -E 's/([[:digit:]]{4})-([[:digit:]]{2})-([[:digit:]]{2})-([[:digit:]]{2})-([[:digit:]]{2})/\1-\2-\3 \4:\5/'\
-)"
-
-# Set the date to use for all further operations
-SOURCE_DATE_EPOCH="$(\
-    date --date="TZ=\"Europe/Amsterdam\" $pretty_version" '+%s'\
-)"
-export SOURCE_DATE_EPOCH
-export FORCE_SOURCE_DATE=1
-
 # Force the locale to C.UTF-8
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
@@ -33,6 +17,9 @@ export LANG=C.UTF-8
 # The ConTeXt standalone distribution is updated daily on the server, and it is
 # bind-mounted into this container at this path.
 source="/opt/context/"
+
+# This is where we will unpack the .zip file that also includes the .mkii files.
+legacy_source="/tmp/context-legacy/"
 
 # An installation of TeX Live is bind-mounted into this container at this path.
 texlive="/opt/texlive/"
@@ -92,17 +79,56 @@ testing="$root/testing/"
 scripts="$root/scripts/"
 
 
+##################
+### Versioning ###
+##################
+
+# The version of ConTeXt that we're packaging, with no spaces or colons.
+safe_version="$(git describe --exact-match --tags)"
+
+# The version of ConTeXt that we're packaging, with spaces and colons.
+pretty_version="$(\
+    echo "$safe_version" | \
+    sed -E 's/([[:digit:]]{4})-([[:digit:]]{2})-([[:digit:]]{2})-([[:digit:]]{2})-([[:digit:]]{2})-([[:upper:]]{1})/\1-\2-\3 \4:\5 \6/'\
+)"
+
+# The version of ConTeXt itself, without the suffix for my interim releases.
+only_version="$(echo "$pretty_version" | sed -E 's/ [[:upper:]]$//')"
+
+# Make sure that we're running against the correct version of ConTeXt.
+_context_version="$( \
+    grep -oP '(?<=def\\contextversion\{)(\d{4}\.\d{2}\.\d{2} \d{2}:\d{2})' \
+    $source/texmf-context/tex/context/base/mkxl/context.mkxl | \
+    tr '.' '-'
+)"
+
+if [ "$_context_version" != "$only_version" ]; then
+    echo "The ConTeXt version in the source code ($_context_version) does not match the version in the Git tag ($safe_version)."
+    exit 1
+fi
+
+# Set the date to use for all further operations
+SOURCE_DATE_EPOCH="$(\
+    date --date="TZ=\"Europe/Amsterdam\" $pretty_version" '+%s'\
+)"
+export SOURCE_DATE_EPOCH
+export FORCE_SOURCE_DATE=1
+
+
 ###############
 ### Folders ###
 ###############
 
-# The ConTeXt runtime files
+# The ConTeXt runtime files.
 mkdir -p "$staging/context.tds/"
 
-# The LuaMetaTeX source code
+# The ConTeXt legacy runtime files.
+mkdir -p "$staging/context-legacy.tds/"
+
+# The LuaMetaTeX source code.
 mkdir -p "$staging/luametatex.src/"
 
-# The non-free (but freely redistributable) ConTeXt files
+# The non-free (but freely redistributable) ConTeXt files.
 mkdir -p "$staging/context-nonfree.tds/"
 
 # Create folders for each platform in a separate binaries tree.
@@ -115,6 +141,9 @@ mkdir -p "$output/"
 
 # The testing folder is where we'll place the files used for testing.
 mkdir -p "$testing/"
+
+# The legacy source folder is where we'll find the original MkII files.
+mkdir -p "$legacy_source/"
 
 
 ################
@@ -227,7 +256,7 @@ cp -a \
 mkdir -p "$staging/context-nonfree.tds/doc/fonts/context/"
 cp -a \
     "$source/texmf-context/doc/fonts/hoekwater/koeieletters/koeieletters.rme" \
-    "$staging/context-nonfree.tds/doc/fonts/context/koeielettersot.txt"
+    "$staging/context-nonfree.tds/doc/fonts/context/koeieletters.txt"
 
 
 #####################
@@ -257,8 +286,10 @@ cp -a "$source/texmf-context/context-readme.txt" \
 cp -a "$packaging/README-PACKAGING.md" \
     "$staging/context.tds/doc/context/"
 
-# ConTeXt VERSION file
+# ConTeXt VERSION and DEPENDS files
 echo "$pretty_version" > "$staging/context.tds/doc/context/VERSION"
+cp -a "$packaging/DEPENDS.txt" \
+    "$staging/context.tds/doc/context/"
 
 # LuaMetaTeX READMEs
 mkdir -p "$staging/context.tds/doc/luametatex/base/"
@@ -424,6 +455,177 @@ mv \
     "$staging/context-nonfree.tds/tex/context/fonts/mkiv/"
 
 
+#####################
+### Legacy (MkII) ###
+#####################
+
+# First, we need to download and unpack the legacy ConTeXt distribution.
+curl -sSL \
+    "https://www.pragma-ade.nl/context/latest/cont-tmf.zip" \
+    -o "$legacy_source/cont-tmf.zip"
+
+unzip -q -d "$legacy_source/" \
+    "$legacy_source/cont-tmf.zip"
+
+rm -f "$legacy_source/cont-tmf.zip"
+
+# Remove any files already installed by the other ConTeXt packages.
+cd "$legacy_source/"
+find "$legacy_source/" -type f -printf '%P\n' | \
+    grep --fixed-strings --file <( \
+        comm -12 \
+        <(find "$staging/" -type f -printf '%f\n' | sort | uniq) \
+        <(find "$legacy_source/" -type f -printf '%f\n' | sort | uniq) \
+    ) | xargs rm
+
+cd "$root/"
+
+# Remove any files that will be installed by the separate mptopdf package.
+find "$legacy_source/" -iname '*mptopdf*' -delete
+
+# Remove the LuaTeX manual, since it is already included in TeX Live.
+rm -f "$legacy_source/doc/context/documents/general/manuals/luatex.pdf"
+
+# Remove any files that only work with the ConTeXt distribution, not TeX Live.
+rm -rf \
+    "$legacy_source/scripts/context/lua/mtx-install"*.lua \
+    "$legacy_source/scripts/context/stubs/" \
+    "$legacy_source/tex/context/base/context.rme" \
+    "$legacy_source/tex/context/modules/third/mtx-install"*.lua \
+    "$legacy_source/tex/context/patterns/common/"*.rme
+
+# Ok, now we'll go over the top-level folders one-by-one.
+
+# doc/
+mkdir -p "$staging/context-legacy.tds/doc/context/"
+cp -a "$legacy_source/doc/context/"* \
+    "$staging/context-legacy.tds/doc/context/"
+
+# Man pages
+mkdir -p "$staging/context-legacy.tds/doc/man/man1/"
+
+cp -a "$legacy_source/doc/context/scripts/mkii/"*.man \
+    "$staging/context-legacy.tds/doc/man/man1/"
+
+prename 's/.man$/.1/' "$staging/context-legacy.tds/doc/man/man1/"*
+
+# tex/
+mkdir -p "$staging/context-legacy.tds/tex/"
+cp -a "$legacy_source/tex/context/" \
+    "$staging/context-legacy.tds/tex/"
+
+mkdir -p "$staging/context-legacy.tds/tex/generic/"
+cp -a "$legacy_source/tex/generic/context/ppchtex/" \
+    "$staging/context-legacy.tds/tex/generic/"
+
+mv "$staging/context-legacy.tds/tex/context/user/mkii/cont-sys.rme" \
+    "$staging/context-legacy.tds/doc/context/README-cont-sys.tex"
+
+# bibtex/
+mkdir -p "$staging/context-legacy.tds/bibtex/bst/context/"
+cp -a "$legacy_source/bibtex/bst/context/mkii/" \
+    "$staging/context-legacy.tds/bibtex/bst/context/"
+
+# colors/
+# (already in context.tds/)
+
+# context/
+cp -a "$legacy_source/context/data/texfont/"* \
+    "$staging/context-legacy.tds/tex/context/fonts/mkii/"
+
+# fonts/
+mkdir -p "$staging/context-legacy.tds/fonts/enc/dvips/"
+cp -a "$legacy_source/fonts/enc/dvips/context/" \
+    "$staging/context-legacy.tds/fonts/enc/dvips/"
+
+mkdir -p "$staging/context-legacy.tds/fonts/enc/pdftex/"
+cp -a "$legacy_source/fonts/enc/pdftex/context/" \
+    "$staging/context-legacy.tds/fonts/enc/pdftex/"
+
+mkdir -p "$staging/context-legacy.tds/fonts/map/dvips/"
+cp -a "$legacy_source/fonts/map/dvips/context/" \
+    "$staging/context-legacy.tds/fonts/map/dvips/"
+
+mkdir -p "$staging/context-legacy.tds/fonts/map/pdftex/"
+cp -a "$legacy_source/fonts/map/pdftex/context/" \
+    "$staging/context-legacy.tds/fonts/map/pdftex/"
+
+mkdir -p "$staging/context-legacy.tds/fonts/afm/public/"
+cp -a "$legacy_source/fonts/afm/hoekwater/context/" \
+    "$staging/context-legacy.tds/fonts/afm/public/"
+
+mkdir -p "$staging/context-legacy.tds/fonts/cid/context/"
+cp -a "$legacy_source/fonts/cid/fontforge/"* \
+    "$staging/context-legacy.tds/fonts/cid/context/"
+
+mkdir -p "$staging/context-legacy.tds/fonts/misc/xetex/fontmapping/"
+cp -a "$legacy_source/fonts/misc/xetex/fontmapping/context/" \
+    "$staging/context-legacy.tds/fonts/misc/xetex/fontmapping/"
+
+mkdir -p "$staging/context-legacy.tds/fonts/tfm/public/"
+cp -a "$legacy_source/fonts/tfm/hoekwater/context/" \
+    "$staging/context-legacy.tds/fonts/tfm/public/"
+
+mkdir -p "$staging/context-legacy.tds/fonts/type1/public/"
+cp -a "$legacy_source/fonts/type1/hoekwater/context/" \
+    "$staging/context-legacy.tds/fonts/type1/public/"
+
+# metapost/
+mkdir -p "$staging/context-legacy.tds/metapost/"
+cp -a "$legacy_source/metapost/context/" \
+    "$staging/context-legacy.tds/metapost/"
+
+# scripts/
+mkdir -p "$staging/context-legacy.tds/scripts/"
+cp -a "$legacy_source/scripts/context/" \
+    "$staging/context-legacy.tds/scripts/"
+
+# source/
+# (already in luametatex.src/)
+
+# web2c/
+# (handled by TeX Live itself)
+
+# Non-free
+mkdir -p "$staging/context-nonfree.tds/fonts/enc/pdftex/context/"
+mv \
+    "$staging/context-legacy.tds/fonts/enc/pdftex/context/koe"* \
+    "$staging/context-nonfree.tds/fonts/enc/pdftex/context/"
+
+mkdir -p "$staging/context-nonfree.tds/fonts/map/pdftex/context/"
+mv \
+    "$staging/context-legacy.tds/fonts/map/pdftex/context/koe"* \
+    "$staging/context-nonfree.tds/fonts/map/pdftex/context/"
+
+mkdir -p "$staging/context-nonfree.tds/fonts/enc/dvips/context/"
+mv \
+    "$staging/context-legacy.tds/fonts/enc/dvips/context/teff-trinite.enc" \
+    "$staging/context-nonfree.tds/fonts/enc/dvips/context/"
+
+mkdir -p "$staging/context-nonfree.tds/fonts/afm/public/context/"
+cp -a \
+    "$legacy_source/fonts/afm/hoekwater/koeieletters/"* \
+    "$staging/context-nonfree.tds/fonts/afm/public/context/"
+
+mkdir -p "$staging/context-nonfree.tds/fonts/tfm/public/context/"
+cp -a \
+    "$legacy_source/fonts/tfm/hoekwater/koeieletters/"* \
+    "$staging/context-nonfree.tds/fonts/tfm/public/context/"
+
+mkdir -p "$staging/context-nonfree.tds/fonts/type1/public/context/"
+cp -a \
+    "$legacy_source/fonts/type1/hoekwater/koeieletters/"* \
+    "$staging/context-nonfree.tds/fonts/type1/public/context/"
+mv \
+    "$staging/context-legacy.tds/fonts/type1/public/context/koeieletters.pfm" \
+    "$staging/context-nonfree.tds/fonts/type1/public/context/koeieletters.pfm"
+
+mkdir -p "$staging/context-nonfree.tds/fonts/vf/public/context/"
+cp -a \
+    "$legacy_source/fonts/vf/hoekwater/koeieletters/"* \
+    "$staging/context-nonfree.tds/fonts/vf/public/context/"
+
+
 ###############
 ### Cleanup ###
 ###############
@@ -442,12 +644,18 @@ find "$staging/" -type d -empty -delete
 # Let's normalize all the permissions.
 chown -R root:root "$staging/"
 chmod -R a=rX,u+w "$staging/"
+
+# Re-add the executable bit to all of the scripts and binaries.
 find "$staging/context.bin/" \
     \( -name 'luametatex' -o -name 'luametatex.exe' \) \
     -type f -print0 | \
     xargs -0 chmod a+x
 
-chmod a+x "$staging/luametatex.src/build."{sh,cmd}
+grep --recursive --files-with-matches --null '^#!/' "$staging/" | \
+    xargs -0 chmod a+x
+
+find "$staging/" -type f \( -iname '*.cmd' -o -iname '*.bat' \) -print0 | \
+    xargs -0 chmod a+x
 
 # Reset the date on all the files in context.bin/ since we can't use
 # add-determinism there.
@@ -473,43 +681,61 @@ cd "$root/"
 
 # Now, we can prepare the CTAN archive. First, let's add the individual zip
 # files.
-mkdir -p "$staging/context.ctan/context/"
+mkdir -p "$staging/context.ctan/context/archives/"
 cp -a "$output/"*.zip \
-    "$staging/context.ctan/context/"
+    "$staging/context.ctan/context/archives/"
 
-# Move the .tds.zip files to the root of the CTAN archive.
-mv "$staging/context.ctan/context/"*.tds.zip \
-    "$staging/context.ctan/"
-
-# Now, we'll add the README.md file and the VERSION file.
+# Now, we'll add the README.md, the VERSION, and DEPENDS files.
 cp -a "$root/README.md" \
     "$staging/context.ctan/context/README.md"
 
 echo "$pretty_version" > "$staging/context.ctan/context/VERSION"
 
+cp -a "$packaging/DEPENDS.txt" \
+    "$staging/context.ctan/context/"
+
 # Next, we'll add the flattened tex/ tree.
 mkdir -p "$staging/context.ctan/context/tex/mkiv/"
-find "$staging/context.tds/tex/" "$staging/context-nonfree.tds/tex/" \
-    -type f -path '*/mkiv/*' -print0 | \
+find "$staging/context.tds/tex/" \
+    "$staging/context-nonfree.tds/tex/" \
+    "$staging/context-legacy.tds/tex/" \
+    -type f \( -path '*/mkiv/*' -o -name 'luatex-*' \) -print0 | \
     xargs -0 cp --backup=numbered \
     --target-directory="$staging/context.ctan/context/tex/mkiv/"
 
 mkdir -p "$staging/context.ctan/context/tex/mkxl/"
-find "$staging/context.tds/tex/" "$staging/context-nonfree.tds/tex/" \
+find "$staging/context.tds/tex/" \
+    "$staging/context-nonfree.tds/tex/" \
+    "$staging/context-legacy.tds/tex/" \
     -type f -path '*/mkxl/*' -print0 | \
     xargs -0 cp --backup=numbered \
     --target-directory="$staging/context.ctan/context/tex/mkxl/"
 
+mkdir -p "$staging/context.ctan/context/tex/mkii/"
+find "$staging/context.tds/tex/" \
+    "$staging/context-nonfree.tds/tex/" \
+    "$staging/context-legacy.tds/tex/" \
+    -type f -path '*/mkii/*' -print0 | \
+    xargs -0 cp --backup=numbered \
+    --target-directory="$staging/context.ctan/context/tex/mkii/"
+
 mkdir -p "$staging/context.ctan/context/tex/misc/"
-find "$staging/context.tds/tex/" "$staging/context-nonfree.tds/tex/" \
-    \( -not -path '*/mkiv/*' \) -a \( -not -path '*/mkxl/*' \) \
+find "$staging/context.tds/tex/" \
+    "$staging/context-nonfree.tds/tex/" \
+    "$staging/context-legacy.tds/tex/" \
+    \( -not -path '*/mkiv/*' \) \
+    -a \( -not -path '*/mkxl/*' \) \
+    -a \( -not -path '*/mkii/*' \)  \
+    -a \( -not -name 'luatex-*' \)  \
     -type f  -print0 | \
     xargs -0 cp --backup=numbered \
     --target-directory="$staging/context.ctan/context/tex/misc/"
 
 # And the flattened doc/ tree.
 mkdir -p "$staging/context.ctan/context/doc/"
-find "$staging/context.tds/doc/" "$staging/context-nonfree.tds/doc/" \
+find "$staging/context.tds/doc/" \
+    "$staging/context-nonfree.tds/doc/" \
+    "$staging/context-legacy.tds/doc/" \
     -type f \( -iname '*.pdf' -o -iname '*.html' \) -print0 | \
     xargs -0 cp --backup=numbered \
     --target-directory="$staging/context.ctan/context/doc/"
@@ -517,6 +743,7 @@ find "$staging/context.tds/doc/" "$staging/context-nonfree.tds/doc/" \
 # And the flattened scripts/ tree.
 mkdir -p "$staging/context.ctan/context/scripts/"
 find "$staging/context.tds/scripts/" \
+    "$staging/context-legacy.tds/scripts/" \
     -type f -print0 | \
     xargs -0 cp --backup=numbered \
     --target-directory="$staging/context.ctan/context/scripts/"
@@ -526,7 +753,9 @@ cp "$staging/context.tds/web2c/texmfcnf.lua" \
 
 # And the flattened fonts/ tree.
 mkdir -p "$staging/context.ctan/context/fonts/"
-find "$staging/context.tds/fonts/" "$staging/context-nonfree.tds/fonts/" \
+find "$staging/context.tds/fonts/" \
+    "$staging/context-nonfree.tds/fonts/" \
+    "$staging/context-legacy.tds/fonts/" \
     -type f -print0 | \
     xargs -0 cp --backup=numbered \
     --target-directory="$staging/context.ctan/context/fonts/"
@@ -534,6 +763,7 @@ find "$staging/context.tds/fonts/" "$staging/context-nonfree.tds/fonts/" \
 # And the flattened metapost/ tree.
 mkdir -p "$staging/context.ctan/context/metapost/"
 find "$staging/context.tds/metapost/" \
+    "$staging/context-legacy.tds/metapost/" \
     -type f -print0 | \
     xargs -0 cp --backup=numbered \
     --target-directory="$staging/context.ctan/context/metapost/"
@@ -569,6 +799,9 @@ add-determinism "$output/context.ctan.zip"
 # Clean up by removing the staging folder.
 cp "$staging/context.ctan/context/VERSION" "$output/version.txt"
 rm -rf "${staging:?}/"
+
+# Remove the extra line breaks from the GitHub release notes.
+sed -Ezi 's/\n  ([^ ])/ \1/g' "$root/files/release-notes.md"
 
 
 ###############

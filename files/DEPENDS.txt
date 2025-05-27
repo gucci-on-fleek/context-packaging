@@ -1,0 +1,95 @@
+# ConTeXt Packaging Scripts
+# https://github.com/gucci-on-fleek/context-packaging
+# SPDX-License-Identifier: CC0-1.0+
+# SPDX-FileCopyrightText: 2025 Max Chernoff
+
+
+#########################
+### ConTeXt MkIV/MkXL ###
+#########################
+
+package context
+
+# LuaMetaTeX is required for the "context"/"mtxrun" scripts, so even if you're
+# only using ConTeXt MkIV, you still need LuaMetaTeX.
+hard context.ARCH  # Contains the LuaMetaTeX engine binaries
+
+# LuaTeX is required for ConTeXt MkIV, but ConTeXt MkXL/LMTX only requires
+# LuaMetaTeX. The "context" package includes both MkIV and MkXL, but since MkXL
+# is the default, it is possible for users to never use MkIV (and therefore
+# LuaTeX).
+soft luatex  # Contains the LuaTeX engine binaries
+
+# Latin Modern (.otf) is the default and fallback font for ConTeXt, so it is
+# required in nearly all cases.
+hard lm       # lm*.otf
+hard lm-math  # latinmodern-math.otf
+
+# ConTeXt uses DejaVu Mono (.ttf) for various tracing functions, so it generally
+# needs to be installed.
+hard dejavu
+
+# The ConTeXt distribution installs the following fonts by default, so it is
+# generally expected that any ConTeXt installation will include them.
+soft almfixed         # almfixed.otf
+soft antt             # AntykwaTorunska*.otf
+soft cm-unicode       # cmuntt.otf
+soft concmath-otf     # Concrete-Math*.otf
+soft ebgaramond       # EBGaramond*.otf, Garamond-Math.otf
+soft erewhon          # Erewhon*.otf
+soft euler-math       # Euler-Math.otf
+soft fontawesome      # FontAwesome.otf
+soft gentium-sil      # Gentium*Plus*.ttf
+soft iwona            # Iwona*.otf
+soft kpfonts-otf      # Kp*.otf
+soft kurier           # Kurier*.otf
+soft libertinus-fonts # Libertinus*.otf
+soft marvosym         # marvosym.ttf
+soft plex             # IBMPlex*.otf
+soft poltawski        # antpolt*.otf
+soft stix2-otf        # STIXTwo*.otf
+soft tex-gyre         # texgyre*.otf
+soft tex-gyre-math    # texgyre*math.otf
+soft xcharter         # XCharter*.otf
+soft xtis             # XITS*.otf
+
+
+####################
+### ConTeXt MkII ###
+####################
+
+package context-legacy
+
+# ConTeXt MkII uses pdfTeX by default, but can also use XeTeX if requested.
+hard pdftex
+soft xetex
+
+# Once again, Latin Modern is the default font for ConTeXt MkII.
+hard lm  # lm*.pfm, etc.
+
+# The current TeX Live "texlive.tlpdb" file says that the following fonts are
+# required for ConTeXt MkII. I'm guessing that _required_ is an overstatement,
+# but it's best to be safe and include them anyways.
+hard amsfonts     # cm*.pfb, cm*.tfm, etc.
+hard manfnt-font  # manfnt.*
+hard mflogo-font  # logo*.pfb, logo*.tfm, etc.
+hard stmaryrd     # stmary*.pfb, stmary*.tfm, etc.
+
+# There are some other fonts that would be good to have for ConTeXt MkII, but
+# there isn't a clear list anywhere, so we'll just include a few arbitrarily
+# chosen ones.
+soft dejavu    # DejaVu*.pfb, DejaVu*.tfm, etc.
+soft tex-gyre  # q*.pfb, q*.tfm, etc.
+
+
+########################
+### ConTeXt Non-Free ###
+########################
+
+package context-nonfree
+
+# The "context-nonfree" contains Non-Free additions for both MkIV/MkXL and MkII.
+# We'll arbitrarily decide that everyone who wants this package will for sure
+# want MkIV/MkXL, and only maybe want MkII.
+hard context
+soft context-legacy
