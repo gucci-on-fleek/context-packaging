@@ -319,6 +319,12 @@ cp -a "$source/texmf-context/doc/context/scripts/mkiv/"*.man \
 
 prename 's/.man$/.1/' "$staging/context.tds/doc/man/man1/"*
 
+# Rename the "mtx-..." manpages to "mtxrun-..." to match the typical Unix
+# conventions.
+prename 's/^mtx-/mtxrun-/' \
+    "$staging/context.tds/doc/man/man1/"* \
+    "$staging/context.tds/doc/context/scripts/mkiv/"*
+
 
 ###############
 ### Scripts ###
@@ -480,16 +486,21 @@ rm -f "$legacy_source/cont-tmf.zip"
 # Remove any files already installed by the other ConTeXt packages.
 cd "$legacy_source/"
 find "$legacy_source/" -type f -printf '%P\n' | \
-    grep --fixed-strings --file <( \
+    grep --file <( \
         comm -12 \
         <(find "$staging/" -type f -printf '%f\n' | sort | uniq) \
-        <(find "$legacy_source/" -type f -printf '%f\n' | sort | uniq) \
+        <(find "$legacy_source/" -type f -printf '%f\n' | sort | uniq) | \
+        sed -e 's/\./\\./g' -e 's/$/$/'
     ) | xargs rm
 
 cd "$root/"
 
 # Remove any files that will be installed by the separate mptopdf package.
 find "$legacy_source/" -iname '*mptopdf*' -delete
+
+# Remove the "mtx-" man pages, since they're already included in the other
+# ConTeXt packages.
+find "$legacy_source/doc/context/scripts/" -iname 'mtx-*' -delete
 
 # Remove the LuaTeX manual, since it is already included in TeX Live.
 rm -f "$legacy_source/doc/context/documents/general/manuals/luatex.pdf"
@@ -587,6 +598,13 @@ cp -a "$legacy_source/metapost/context/" \
 mkdir -p "$staging/context-legacy.tds/scripts/"
 cp -a "$legacy_source/scripts/context/" \
     "$staging/context-legacy.tds/scripts/"
+
+mkdir -p "$staging/context-legacy.tds/scripts/context/stubs/"{unix,win64}/
+cp -a "$packaging/"{texexec,texmfstart} \
+    "$staging/context-legacy.tds/scripts/context/stubs/unix/"
+
+cp -a "$packaging/"{texexec,texmfstart}.cmd \
+    "$staging/context-legacy.tds/scripts/context/stubs/win64/"
 
 # source/
 # (already in luametatex.src/)

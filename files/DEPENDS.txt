@@ -62,6 +62,10 @@ soft xtis             # XITS*.otf
 
 package context-legacy
 
+# The "texexec" and "texmfstart" runner scripts internally call "mtxrun", so
+# we must have the main ConTeXt package installed in order to use ConTeXt MkII.
+hard context
+
 # ConTeXt MkII uses pdfTeX by default, but can also use XeTeX if requested.
 hard pdftex
 soft xetex
