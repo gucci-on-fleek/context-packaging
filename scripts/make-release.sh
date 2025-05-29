@@ -454,6 +454,14 @@ mv \
     "$staging/context.tds/tex/context/fonts/mkiv/"*{cambria,koeiel,lucida,mathtimes,minion}*.lfg \
     "$staging/context-nonfree.tds/tex/context/fonts/mkiv/"
 
+# The following files are acceptable to include in TeX Live, but Hans
+# specifically requested (2025-05-29) that we not include any files that depend
+# upon missing .lfg files, so that users never accidentally typeset documents
+# with the goodie files missing and get poor output quality as a result.
+mv \
+    "$staging/context.tds/tex/context/fonts/mkiv/type-imp-"{cambria,koeielettersot,lucida,lucida-typeone,mathtimes,minion,mscore}.mkiv \
+    "$staging/context-nonfree.tds/tex/context/fonts/mkiv/"
+
 
 #####################
 ### Legacy (MkII) ###
@@ -515,7 +523,7 @@ cp -a "$legacy_source/tex/context/" \
     "$staging/context-legacy.tds/tex/"
 
 mkdir -p "$staging/context-legacy.tds/tex/generic/"
-cp -a "$legacy_source/tex/generic/context/ppchtex/" \
+cp -a "$legacy_source/tex/generic/context/" \
     "$staging/context-legacy.tds/tex/generic/"
 
 mv "$staging/context-legacy.tds/tex/context/user/mkii/cont-sys.rme" \
@@ -685,6 +693,15 @@ mkdir -p "$staging/context.ctan/context/archives/"
 cp -a "$output/"*.zip \
     "$staging/context.ctan/context/archives/"
 
+# Remove the .tds suffix from the zip files so that the CTAN scripts don't get
+# confused.
+prename 's/\.tds\.zip$/.zip/' \
+    "$staging/context.ctan/context/archives/"*.zip
+
+# Add the INSTALLING.md file to explain the archives.
+cp -a "$packaging/INSTALLING.md" \
+    "$staging/context.ctan/context/archives/INSTALLING.md"
+
 # Now, we'll add the README.md, the VERSION, and DEPENDS files.
 cp -a "$root/README.md" \
     "$staging/context.ctan/context/README.md"
@@ -782,6 +799,10 @@ for tl_platform in "${context_platforms[@]}" "${luametatex_platforms[@]}"; do
     cp -a "$staging/context.bin/$tl_platform/luametatex"* \
         "$staging/context.ctan/context/bin/luametatex-$tl_platform"
 done
+
+# Add some documentation for the binaries.
+cp -a "$packaging/README-BINARIES.md" \
+    "$staging/context.ctan/context/bin/README.md"
 
 # We needed the "--backup=numbered" flag to avoid the "cp: will not overwrite
 # just-created" error, so now we'll remove all of the numbered backup files.

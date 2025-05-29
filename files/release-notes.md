@@ -13,8 +13,8 @@
   distribution's package manager.
 
 - `context.bin.zip` contains the binaries necessary to run ConTeXt. To
-  use this, unpack it into your `$PATH`, and then remove the platform
-  suffix from the binary appropriate for your system.
+  use this, unpack it, and then copy the subfolder appropriate to your
+  platform into your `$PATH`.
 
 - `context-nonfree.tds.zip` contains the non-free files that can
   optionally be used with ConTeXt. This is not included in the standard

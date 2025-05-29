@@ -11,8 +11,10 @@
 package context
 
 # LuaMetaTeX is required for the "context"/"mtxrun" scripts, so even if you're
-# only using ConTeXt MkIV, you still need LuaMetaTeX.
-hard context.ARCH  # Contains the LuaMetaTeX engine binaries
+# only using ConTeXt MkIV, you still need LuaMetaTeX. The LuaMetaTeX binaries
+# are contained in platform-specific "context.ARCH" packages, which we cannot
+# depend upon here. Regardless, tlmgr will handle this correctly, so we don't
+# need to do anything here.
 
 # LuaTeX is required for ConTeXt MkIV, but ConTeXt MkXL/LMTX only requires
 # LuaMetaTeX. The "context" package includes both MkIV and MkXL, but since MkXL

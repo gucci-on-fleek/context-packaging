@@ -3,7 +3,8 @@
      SPDX-License-Identifier: CC0-1.0+
      SPDX-FileCopyrightText: 2025 Max Chernoff -->
 
-# ConTeXt Packaging
+ConTeXt Packaging
+=================
 
 ConTeXt is officially distributed as part of the [ConTeXt Standalone
 Distribution](https://wiki.contextgarden.net/Introduction/Installation);
@@ -17,7 +18,9 @@ Note that this project only packages the newer MkIV (LuaTeX) and MkXL
 (LuaMetaTeX) formats; the legacy MkII (pdfTeX and XeTeX) formats are
 packaged by the TeX Live maintainers directly.
 
-## Support
+
+Support
+-------
 
 If you have a problem with ConTeXt itself, it is best to report it to
 the official
@@ -34,7 +37,9 @@ mailing lists, or email me privately at `tex@maxchernoff.ca`. [Pull
 requests](https://github.com/gucci-on-fleek/context-packaging/compare)
 are also gladly accepted.
 
-## Licence
+
+Licence
+-------
 
 The vast majority of files in this package originate from ConTeXt
 itself; please see

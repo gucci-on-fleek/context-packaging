@@ -3,7 +3,8 @@
      SPDX-License-Identifier: CC0-1.0+
      SPDX-FileCopyrightText: 2025 Max Chernoff -->
 
-# ConTeXt Packaging Scripts
+ConTeXt Packaging Scripts
+=========================
 
 This repository hosts the scripts used to package the contents of the
 [ConTeXt Standalone
@@ -15,7 +16,9 @@ Note that this project only packages the newer MkIV (LuaTeX) and MkXL
 (LuaMetaTeX) formats; the legacy MkII (pdfTeX and XeTeX) formats are
 packaged by the TeX Live maintainers directly.
 
-## Architecture
+
+Architecture
+------------
 
 1. [Every
    day](https://github.com/gucci-on-fleek/maxchernoff.ca/blob/master/tex/.config/systemd/user/update-texlive.timer),
@@ -46,13 +49,17 @@ Note that steps 2 and 3 (where all the important stuff happens) are
 executed on [Woodpecker CI, so the full build logs are publicly
 available](https://woodpecker.maxchernoff.ca/repos/4).
 
-## Files
+
+Files
+-----
 
 A few TeX Live-specific files for ConTeXt are contained in the
 [`files/`](files) directory. Check the comments in each file for more
 details.
 
-## Contributing
+
+Support and Contributing
+------------------------
 
 If you have a problem with ConTeXt itself, it is best to report it to
 the official
@@ -69,7 +76,19 @@ mailing lists, or email me privately at `tex@maxchernoff.ca`. [Pull
 requests](https://github.com/gucci-on-fleek/context-packaging/compare)
 are also gladly accepted.
 
-## Licence
+
+Installing
+----------
+
+ConTeXt is a fairly complex package to install—if at all possible,
+please use `tlmgr` (TeX Live) or `mpm` (MikTeX), since manually
+unpacking and installing the files is error-prone and complicated. But
+if you insist on installing manually, please refer to
+[`INSTALLING.md`](files/INSTALLING.md).
+
+
+Licence
+-------
 
 The vast majority of files in the zip files originate from ConTeXt
 itself; please see
