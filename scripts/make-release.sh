@@ -311,19 +311,23 @@ find "$staging/context.tds/doc/context/" \
 # over.
 rm -f "$staging/context.tds/doc/context/documents/general/manuals/luatex.pdf"
 
+# Rename the "mtx-..." manpages to "mtxrun-..." to match the typical Unix
+# conventions.
+prename 's/mtx-/mtxrun-/' \
+    "$staging/context.tds/doc/context/scripts/mkiv/"*
+
+# Remove the "mtxrun-install*" man pages, since we're not installing the
+# corresponding scripts.
+rm -f \
+    "$staging/context.tds/doc/context/scripts/mkiv/mtxrun-install"*
+
 # Copy the ConTeXt man pages to the TeX Live MANPATH.
 mkdir -p "$staging/context.tds/doc/man/man1/"
 
-cp -a "$source/texmf-context/doc/context/scripts/mkiv/"*.man \
+cp -a "$staging/context.tds/doc/context/scripts/mkiv/"*.man \
     "$staging/context.tds/doc/man/man1/"
 
 prename 's/.man$/.1/' "$staging/context.tds/doc/man/man1/"*
-
-# Rename the "mtx-..." manpages to "mtxrun-..." to match the typical Unix
-# conventions.
-prename 's/^mtx-/mtxrun-/' \
-    "$staging/context.tds/doc/man/man1/"* \
-    "$staging/context.tds/doc/context/scripts/mkiv/"*
 
 
 ###############
@@ -336,11 +340,6 @@ prename 's/^mtx-/mtxrun-/' \
 mkdir -p "$staging/context.tds/scripts/context/"
 cp -a "$source/texmf-context/scripts/context/lua/" \
     "$staging/context.tds/scripts/context/"
-
-# The pdftrimwhite.pl script is still useful, so let's copy it over.
-mkdir -p "$staging/context.tds/scripts/context/perl/"
-cp -a "$source/texmf-context/scripts/context/perl/pdftrimwhite.pl" \
-    "$staging/context.tds/scripts/context/perl/"
 
 # The mtx-install and mtx-install-modules scripts are used to upgrade the
 # ConTeXt distribution and to install modules from the ConTeXt Garden. Since
@@ -507,6 +506,7 @@ rm -f "$legacy_source/doc/context/documents/general/manuals/luatex.pdf"
 
 # Remove any files that only work with the ConTeXt distribution, not TeX Live.
 rm -rf \
+    "$legacy_source/doc/context/scripts/mkiv/mtx-install"* \
     "$legacy_source/scripts/context/lua/mtx-install"*.lua \
     "$legacy_source/scripts/context/stubs/" \
     "$legacy_source/tex/context/base/context.rme" \
@@ -523,7 +523,7 @@ cp -a "$legacy_source/doc/context/"* \
 # Man pages
 mkdir -p "$staging/context-legacy.tds/doc/man/man1/"
 
-cp -a "$legacy_source/doc/context/scripts/mkii/"*.man \
+cp -a "$legacy_source/doc/context/scripts/mkii/"{texmfstart,texexec}.man \
     "$staging/context-legacy.tds/doc/man/man1/"
 
 prename 's/.man$/.1/' "$staging/context-legacy.tds/doc/man/man1/"*
@@ -771,7 +771,8 @@ mkdir -p "$staging/context.ctan/context/doc/"
 find "$staging/context.tds/doc/" \
     "$staging/context-nonfree.tds/doc/" \
     "$staging/context-legacy.tds/doc/" \
-    -type f \( -iname '*.pdf' -o -iname '*.html' \) -print0 | \
+    \( -iname '*.pdf' -o -iname '*.html' -o -iname '*.txt' -o -iname '*.md' \) \
+    -type f  -print0 | \
     xargs -0 cp --backup=numbered \
     --target-directory="$staging/context.ctan/context/doc/"
 
@@ -821,6 +822,19 @@ done
 # Add some documentation for the binaries.
 cp -a "$packaging/README-BINARIES.md" \
     "$staging/context.ctan/context/bin/README.md"
+
+# Ok, now let's fix the Markdown links in the CTAN files.
+sed -i -E \
+    -e 's|https://texdoc.org/serve/mreadme/0|doc/mreadme.pdf|g' \
+    -e 's|https://texdoc.org/serve/mreadme.pdf/0|mreadme.pdf|g' \
+    -e 's|\(files\)|(https://github.com/gucci-on-fleek/context-packaging/tree/master/files)|g' \
+    -e 's|files/INSTALLING.md|archives/INSTALLING.md|g' \
+    -e 's|\(DEPENDS.txt\)|(../DEPENDS.txt)|g' \
+    -e 's|\(INSTALLING.md\)|(../archives/INSTALLING.md)|g' \
+    "$staging/context.ctan/context/archives/INSTALLING.md" \
+    "$staging/context.ctan/context/bin/README.md" \
+    "$staging/context.ctan/context/doc/README-PACKAGING.md" \
+    "$staging/context.ctan/context/README.md"
 
 # We needed the "--backup=numbered" flag to avoid the "cp: will not overwrite
 # just-created" error, so now we'll remove all of the numbered backup files.
