@@ -26,17 +26,17 @@ Architecture
    installation](https://github.com/gucci-on-fleek/maxchernoff.ca/blob/master/usrlocal/bin/update-context.sh).
 
 2. Afterwards, [the `daily-check` workflow in this
-   repository](.woodpecker/daily-check.yaml) runs. [It extracts the
+   repository][daily-check.yaml] runs. [It extracts the
    version number of the current ConTeXt installation, and then attempts
-   to make a corresponding Git tag.](scripts/daily-check.sh) If it fails
+   to make a corresponding Git tag.][daily-check.sh] If it fails
    (because the tag already exists), it gracefully exits; if it
    succeeds, it [pushes the tag to this
    repository](https://github.com/gucci-on-fleek/context-packaging/tags).
 
 3. Whenever a tag is pushed, [the `make-release` workflow in this
-   repository](.woodpecker/make-release.yaml) runs. [It reorganizes and
+   repository][make-release.yaml] runs. [It reorganizes and
    zips the contents of the ConTeXt standalone distribution into the
-   format expected by TeX Live.](scripts/make-release.sh) Afterwards,
+   format expected by TeX Live.][make-release.sh] Afterwards,
    [it uploads the `.zip` files into a new GitHub
    release](https://github.com/gucci-on-fleek/context-packaging/releases).
 
@@ -54,7 +54,7 @@ Files
 -----
 
 A few TeX Live-specific files for ConTeXt are contained in the
-[`files/`](files) directory. Check the comments in each file for more
+[`files/`][files] directory. Check the comments in each file for more
 details.
 
 
@@ -84,7 +84,7 @@ ConTeXt is a fairly complex package to install—if at all possible,
 please use `tlmgr` (TeX Live) or `mpm` (MikTeX), since manually
 unpacking and installing the files is error-prone and complicated. But
 if you insist on installing manually, please refer to
-[`INSTALLING.md`](files/INSTALLING.md).
+[`INSTALLING.md`][INSTALLING.md].
 
 
 Licence
@@ -92,6 +92,29 @@ Licence
 
 The vast majority of files in the zip files originate from ConTeXt
 itself; please see
-[`doc/context/documents/general/manuals/mreadme.pdf`](https://texdoc.org/serve/mreadme/0)
+[`doc/context/documents/general/manuals/mreadme.pdf`][mreadme.pdf]
 for details on their licensing. The files directly contained in this
 repository are placed in the public domain.
+
+
+<!-- BEGIN github -->
+   [daily-check.yaml]:  .woodpecker/daily-check.yaml
+   [daily-check.sh]:    scripts/daily-check.sh
+   [make-release.yaml]: .woodpecker/make-release.yaml
+   [make-release.sh]:   scripts/make-release.sh
+   [files]:             files/
+   [INSTALLING.md]:     files/INSTALLING.md
+   [mreadme.pdf]:       https://texdoc.org/serve/mreadme/0
+<!-- END github -->
+
+<!-- LINKS ctan
+   [daily-check.yaml]:  https://github.com/gucci-on-fleek/context-packaging/tree/master/.woodpecker/daily-check.yaml
+   [daily-check.sh]:    https://github.com/gucci-on-fleek/context-packaging/tree/master/scripts/daily-check.sh
+   [make-release.yaml]: https://github.com/gucci-on-fleek/context-packaging/tree/master/.woodpecker/make-release.yaml
+   [make-release.sh]:   https://github.com/gucci-on-fleek/context-packaging/tree/master/scripts/make-release.sh
+   [files]:             https://github.com/gucci-on-fleek/context-packaging/tree/master/files/
+   [INSTALLING.md]:     https://github.com/gucci-on-fleek/context-packaging/tree/master/files/INSTALLING.md
+   [mreadme.pdf]:       doc/mreadme.pdf
+     LINKS ctan -->
+
+

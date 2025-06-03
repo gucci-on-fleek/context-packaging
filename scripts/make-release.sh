@@ -107,6 +107,13 @@ if [ "$_context_version" != "$only_version" ]; then
     exit 1
 fi
 
+# Get the version of LuaMetaTeX from the source code.
+luametatex_version="$(\
+    grep -P '#\s*define\s*luametatex_development_id' \
+    "$source/texmf-context/source/luametatex/source/luametatex.h" | \
+    grep -oP '\d+' \
+)"
+
 # Set the date to use for all further operations
 SOURCE_DATE_EPOCH="$(\
     date --date="TZ=\"Europe/Amsterdam\" $pretty_version" '+%s'\
@@ -539,7 +546,9 @@ cp -a "$legacy_source/tex/generic/context/" \
     "$staging/context-legacy.tds/tex/generic/"
 
 mv "$staging/context-legacy.tds/tex/context/user/mkii/cont-sys.rme" \
-    "$staging/context-legacy.tds/doc/context/README-cont-sys.tex"
+    "$staging/context-legacy.tds/tex/context/user/mkii/cont-sys.mkii"
+
+rm "$staging/context-legacy.tds/tex/context/base/mkii/cont-sys.ori"
 
 # bibtex/
 mkdir -p "$staging/context-legacy.tds/bibtex/bst/context/"
@@ -741,6 +750,10 @@ cp -a "$output/"*.zip \
 prename 's/\.tds\.zip$/.zip/' \
     "$staging/context.ctan/context/archives/"*.zip
 
+# Rename the LuaMetaTeX source zip to include the version number.
+mv "$staging/context.ctan/context/archives/luametatex.src.zip" \
+    "$staging/context.ctan/context/archives/luametatex-$luametatex_version.src.zip"
+
 # Add the INSTALLING.md file to explain the archives.
 cp -a "$packaging/INSTALLING.md" \
     "$staging/context.ctan/context/archives/INSTALLING.md"
@@ -854,13 +867,7 @@ cp -a "$packaging/README-BINARIES.md" \
     "$staging/context.ctan/context/bin/README.md"
 
 # Ok, now let's fix the Markdown links in the CTAN files.
-sed -i -E \
-    -e 's|https://texdoc.org/serve/mreadme/0|doc/mreadme.pdf|g' \
-    -e 's|https://texdoc.org/serve/mreadme.pdf/0|mreadme.pdf|g' \
-    -e 's|\(files\)|(https://github.com/gucci-on-fleek/context-packaging/tree/master/files)|g' \
-    -e 's|files/INSTALLING.md|archives/INSTALLING.md|g' \
-    -e 's|\(DEPENDS.txt\)|(../DEPENDS.txt)|g' \
-    -e 's|\(INSTALLING.md\)|(../archives/INSTALLING.md)|g' \
+sed -i '/BEGIN github/,/END github/d; /LINKS ctan/d' \
     "$staging/context.ctan/context/archives/INSTALLING.md" \
     "$staging/context.ctan/context/bin/README.md" \
     "$staging/context.ctan/context/doc/README-PACKAGING.md" \

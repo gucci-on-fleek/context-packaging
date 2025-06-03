@@ -9,7 +9,7 @@ ConTeXt Binaries on CTAN
 Successfully installing these binaries for use with ConTeXt requires
 many steps; users are strongly urged to use their TeX distribution's
 package manager instead of using these files directly. See
-[`INSTALLING.md`](INSTALLING.md) for further discussion.
+[`INSTALLING.md`][INSTALLING.md] for further discussion.
 
 
 Binary Structure
@@ -32,7 +32,15 @@ requirements must be met.
    in `$TEXMFDIST/scripts/context/lua/` (recommended), or may be
    bitwise-identical copies of these files.
 
-
 Step 3 is the most important step, and cannot be circumvented—there is
 no way to run ConTeXt without the (non-executable) scripts being present
 directly beside the corresponding binaries.
+
+
+<!-- BEGIN github -->
+   [INSTALLING.md]: INSTALLING.md
+<!-- END github -->
+
+<!-- LINKS ctan
+   [INSTALLING.md]: ../archives/INSTALLING.md
+     LINKS ctan -->

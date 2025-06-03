@@ -62,4 +62,13 @@ Dependencies
 ------------
 
 ConTeXt has very few dependencies; please refer to
-[`DEPENDS.txt`](DEPENDS.txt) for a full discussion.
+[`DEPENDS.txt`][DEPENDS.txt] for a full discussion.
+
+
+<!-- BEGIN github -->
+   [DEPENDS.txt]: DEPENDS.txt
+<!-- END github -->
+
+<!-- LINKS ctan
+   [DEPENDS.txt]: ../DEPENDS.txt
+     LINKS ctan -->

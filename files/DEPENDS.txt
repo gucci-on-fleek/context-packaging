@@ -53,7 +53,7 @@ soft stix2-otf        # STIXTwo*.otf
 soft tex-gyre         # texgyre*.otf
 soft tex-gyre-math    # texgyre*math.otf
 soft xcharter         # XCharter*.otf
-soft xtis             # XITS*.otf
+soft xits             # XITS*.otf
 
 
 ####################
@@ -77,6 +77,7 @@ hard lm  # lm*.pfm, etc.
 # required for ConTeXt MkII. I'm guessing that _required_ is an overstatement,
 # but it's best to be safe and include them anyways.
 hard amsfonts     # cm*.pfb, cm*.tfm, etc.
+hard ly1          # texnansi.enc
 hard manfnt-font  # manfnt.*
 hard mflogo-font  # logo*.pfb, logo*.tfm, etc.
 hard stmaryrd     # stmary*.pfb, stmary*.tfm, etc.

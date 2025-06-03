@@ -43,6 +43,15 @@ Licence
 
 The vast majority of files in this package originate from ConTeXt
 itself; please see
-[`doc/context/documents/general/manuals/mreadme.pdf`](https://texdoc.org/serve/mreadme.pdf/0)
+[`doc/context/documents/general/manuals/mreadme.pdf`][mreadme.pdf]
 for details on their licensing. The very few files created by this
 packaging project are placed in the public domain.
+
+
+<!-- BEGIN github -->
+   [mreadme.pdf]: https://texdoc.org/serve/mreadme/0
+<!-- END github -->
+
+<!-- LINKS ctan
+   [mreadme.pdf]: mreadme.pdf
+     LINKS ctan -->
