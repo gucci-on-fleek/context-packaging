@@ -131,6 +131,10 @@ mkdir -p "$staging/luametatex.src/"
 # The non-free (but freely redistributable) ConTeXt files.
 mkdir -p "$staging/context-nonfree.tds/"
 
+# The "mptopdf" package is derived from the ConTeXt MkII source, yet distributed
+# by TL as a separate package.
+mkdir -p "$staging/mptopdf.tds/"
+
 # Create folders for each platform in a separate binaries tree.
 for tl_platform in "${context_platforms[@]}" "${luametatex_platforms[@]}"; do
     mkdir -p "$staging/context.bin/$tl_platform/"
@@ -494,9 +498,6 @@ find "$legacy_source/" -type f -printf '%P\n' | \
 
 cd "$root/"
 
-# Remove any files that will be installed by the separate mptopdf package.
-find "$legacy_source/" -iname '*mptopdf*' -delete
-
 # Remove the "mtx-" man pages, since they're already included in the other
 # ConTeXt packages.
 find "$legacy_source/doc/context/scripts/" -iname 'mtx-*' -delete
@@ -653,6 +654,30 @@ cp -a \
 
 
 ###############
+### mptopdf ###
+###############
+
+# tex/generic/
+mkdir -p "$staging/mptopdf.tds/tex/generic/context/"
+
+mv "$staging/context-legacy.tds/tex/generic/context/mptopdf/" \
+    "$staging/mptopdf.tds/tex/generic/context/"
+
+# tex/context/
+mkdir -p "$staging/mptopdf.tds/tex/context/base/mkii/"
+
+mv "$staging/context-legacy.tds/tex/context/base/mkii/supp-"{mis,mpe,pdf}.mkii \
+    "$staging/context-legacy.tds/tex/context/base/mkii/syst-tex.mkii" \
+    "$staging/mptopdf.tds/tex/context/base/mkii/"
+
+# scripts/
+mkdir -p "$staging/mptopdf.tds/scripts/context/perl/"
+
+mv "$staging/context-legacy.tds/scripts/context/perl/mptopdf.pl" \
+    "$staging/mptopdf.tds/scripts/context/perl/"
+
+
+###############
 ### Cleanup ###
 ###############
 
@@ -734,6 +759,7 @@ mkdir -p "$staging/context.ctan/context/tex/mkiv/"
 find "$staging/context.tds/tex/" \
     "$staging/context-nonfree.tds/tex/" \
     "$staging/context-legacy.tds/tex/" \
+    "$staging/mptopdf.tds/tex/" \
     -type f \( -path '*/mkiv/*' -o -name 'luatex-*' \) -print0 | \
     xargs -0 cp --backup=numbered \
     --target-directory="$staging/context.ctan/context/tex/mkiv/"
@@ -742,6 +768,7 @@ mkdir -p "$staging/context.ctan/context/tex/mkxl/"
 find "$staging/context.tds/tex/" \
     "$staging/context-nonfree.tds/tex/" \
     "$staging/context-legacy.tds/tex/" \
+    "$staging/mptopdf.tds/tex/" \
     -type f -path '*/mkxl/*' -print0 | \
     xargs -0 cp --backup=numbered \
     --target-directory="$staging/context.ctan/context/tex/mkxl/"
@@ -750,6 +777,7 @@ mkdir -p "$staging/context.ctan/context/tex/mkii/"
 find "$staging/context.tds/tex/" \
     "$staging/context-nonfree.tds/tex/" \
     "$staging/context-legacy.tds/tex/" \
+    "$staging/mptopdf.tds/tex/" \
     -type f -path '*/mkii/*' -print0 | \
     xargs -0 cp --backup=numbered \
     --target-directory="$staging/context.ctan/context/tex/mkii/"
@@ -758,6 +786,7 @@ mkdir -p "$staging/context.ctan/context/tex/misc/"
 find "$staging/context.tds/tex/" \
     "$staging/context-nonfree.tds/tex/" \
     "$staging/context-legacy.tds/tex/" \
+    "$staging/mptopdf.tds/tex/" \
     \( -not -path '*/mkiv/*' \) \
     -a \( -not -path '*/mkxl/*' \) \
     -a \( -not -path '*/mkii/*' \)  \
@@ -780,6 +809,7 @@ find "$staging/context.tds/doc/" \
 mkdir -p "$staging/context.ctan/context/scripts/"
 find "$staging/context.tds/scripts/" \
     "$staging/context-legacy.tds/scripts/" \
+    "$staging/mptopdf.tds/tex/" \
     -type f -print0 | \
     xargs -0 cp --backup=numbered \
     --target-directory="$staging/context.ctan/context/scripts/"
