@@ -17,6 +17,23 @@ Note that this project only packages the newer MkIV (LuaTeX) and MkXL
 packaged by the TeX Live maintainers directly.
 
 
+Goals
+-----
+
+The primary goal of this project is to make an installation of TeX Live
+with `scheme-context` (plus `context-nonfree` from
+[TLContrib](https://contrib.texlive.info/)) behave identically to the
+[ConTeXt Standalone Distribution](https://www.pragma-ade.nl/install.htm)
+with [all modules
+installed](https://wiki.contextgarden.net/Input_and_compilation/Modules#Installation_by_script_.28LMTX.29).
+Note that `scheme-full` (<abbr>AKA</abbr> the default “Full” TeX Live
+installation) is a superset of `scheme-context`, which means that most
+users will have a complete ConTeXt installation by default.
+
+I consider any deviations from this goal to be bugs, so if you find any
+differences, please let me know!
+
+
 Architecture
 ------------
 

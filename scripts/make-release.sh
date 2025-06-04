@@ -685,6 +685,15 @@ mkdir -p "$staging/mptopdf.tds/scripts/context/perl/"
 mv "$staging/context-legacy.tds/scripts/context/perl/mptopdf.pl" \
     "$staging/mptopdf.tds/scripts/context/perl/"
 
+# doc/
+mkdir -p "$staging/mptopdf.tds/doc/context/scripts/mkii/"
+mv "$staging/context-legacy.tds/doc/context/scripts/mkii/mptopdf.man" \
+    "$staging/mptopdf.tds/doc/context/scripts/mkii/"
+
+mkdir -p "$staging/mptopdf.tds/doc/man/man1/"
+mv "$staging/context-legacy.tds/doc/man/man1/mptopdf.1" \
+    "$staging/mptopdf.tds/doc/man/man1/"
+
 
 ###############
 ### Cleanup ###
@@ -758,14 +767,32 @@ mv "$staging/context.ctan/context/archives/luametatex.src.zip" \
 cp -a "$packaging/INSTALLING.md" \
     "$staging/context.ctan/context/archives/INSTALLING.md"
 
-# Now, we'll add the README.md, the VERSION, and DEPENDS files.
+# Now, we'll add the README.md and the VERSION files.
 cp -a "$root/README.md" \
     "$staging/context.ctan/context/README.md"
 
 echo "$pretty_version" > "$staging/context.ctan/context/VERSION"
 
+# Now, we'll handle the DEPENDS file by copying it to the CTAN folder, and then
+# appending the list of packages included with the ConTeXt standalone
+# distribution.
 cp -a "$packaging/DEPENDS.txt" \
     "$staging/context.ctan/context/"
+
+tlmgr search --file \
+    "texmf-dist/(tex|scripts|fonts|metapost)/.*/($(\
+        find "$source/texmf/fonts/" \
+        "$source/texmf-modules/"{tex,scripts,fonts,metapost}/ \
+        -regextype egrep -type f \
+        -iregex '.*\.(mkxl|mklx|mkiv|mkvi|mkii|tex|lmt|lua|otf|ttf)' \
+        -printf '%f\n' | \
+        sort | uniq | \
+        tr '\n' '|' | head --bytes=-1 \
+    ))\$" | \
+    grep -oP '^[\w_-]+' | \
+    sort | uniq | \
+    sed 's/^/hard /' \
+    >> "$staging/context.ctan/context/DEPENDS.txt"
 
 # Next, we'll add the flattened tex/ tree.
 mkdir -p "$staging/context.ctan/context/tex/mkiv/"
