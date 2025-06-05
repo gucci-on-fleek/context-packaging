@@ -195,10 +195,10 @@ for tl_platform in "${luametatex_platforms[@]}"; do
         -o "$staging/context.bin/$tl_platform/luametatex"
 
     # Symbolic links
-    ln -s "$staging/context.bin/$tl_platform/luametatex" \
+    ln -s luametatex \
         "$staging/context.bin/$tl_platform/mtxrun"
 
-    ln -s "$staging/context.bin/$tl_platform/luametatex" \
+    ln -s luametatex \
         "$staging/context.bin/$tl_platform/context"
 
     ln -sf ../../texmf-dist/scripts/context/lua/context.lua \
@@ -687,12 +687,12 @@ mv "$staging/context-legacy.tds/scripts/context/perl/mptopdf.pl" \
 
 # doc/
 mkdir -p "$staging/mptopdf.tds/doc/context/scripts/mkii/"
-mv "$staging/context-legacy.tds/doc/context/scripts/mkii/mptopdf.man" \
+mv "$staging/context-legacy.tds/doc/context/scripts/mkii/mptopdf"* \
     "$staging/mptopdf.tds/doc/context/scripts/mkii/"
 
 mkdir -p "$staging/mptopdf.tds/doc/man/man1/"
-mv "$staging/context-legacy.tds/doc/man/man1/mptopdf.1" \
-    "$staging/mptopdf.tds/doc/man/man1/"
+cp "$staging/mptopdf.tds/doc/context/scripts/mkii/mptopdf.man" \
+    "$staging/mptopdf.tds/doc/man/man1/mptopdf.1"
 
 
 ###############
