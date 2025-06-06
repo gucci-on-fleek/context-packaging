@@ -122,9 +122,7 @@ return {
             MPINPUTS    = ".;$TEXMF/metapost//",
             BIBINPUTS   = ".;$TEXMF/bibtex/bib//;$TEXMF/tex/context/bib//",
             ICCPROFILES = ".;" .. nontex_colors ..
-                          "$TEXMF/tex/context/colors//;\z
-                           $TEXMF/tex/context/nonfree/colors//;\z
-                           $OSCOLORDIR",
+                          "$TEXMF/tex/context/colors//;$OSCOLORDIR",
         },
 
         -- Copied from the original ConTeXt file; don't change these unless you

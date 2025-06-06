@@ -259,15 +259,15 @@ cp -a \
     "$staging/context.tds/fonts/truetype/public/context/"
 
 # Non-free
-mkdir -p "$staging/context-nonfree.tds/fonts/truetype/public/context-nonfree/"
+mkdir -p "$staging/context-nonfree.tds/fonts/truetype/public/context/"
 cp -a \
     "$source/texmf-context/fonts/truetype/hoekwater/koeieletters/koeielettersot.ttf" \
-    "$staging/context-nonfree.tds/fonts/truetype/public/context-nonfree/"
+    "$staging/context-nonfree.tds/fonts/truetype/public/context/"
 
-mkdir -p "$staging/context-nonfree.tds/doc/fonts/context-nonfree/"
+mkdir -p "$staging/context-nonfree.tds/doc/fonts/context/"
 cp -a \
     "$source/texmf-context/doc/fonts/hoekwater/koeieletters/koeieletters.rme" \
-    "$staging/context-nonfree.tds/doc/fonts/context-nonfree/koeieletters.txt"
+    "$staging/context-nonfree.tds/doc/fonts/context/koeieletters.txt"
 
 
 #####################
@@ -458,17 +458,17 @@ cp -a "$packaging/texmfcnf.lua" \
 # redistributable, so they are included in the tlcontrib repository.
 
 # These two colour profiles have unclear licenses
-mkdir -p "$staging/context-nonfree.tds/tex/context/nonfree/colors/"
+mkdir -p "$staging/context-nonfree.tds/tex/context/colors/profiles/"
 mv \
-    "$staging/context.tds/tex/context/nonfree/colors/colo-imp-"{srgb,isocoated_v2_eci}.icc \
-    "$staging/context-nonfree.tds/tex/context/nonfree/colors/"
+    "$staging/context.tds/tex/context/colors/profiles/colo-imp-"{srgb,isocoated_v2_eci}.icc \
+    "$staging/context-nonfree.tds/tex/context/colors/profiles/"
 
 # These Lua Font Goodie files are themselves free, but they exist only to
 # support non-free fonts, so we'll move them to the non-free folder.
-mkdir -p "$staging/context-nonfree.tds/tex/context/nonfree/fonts/"
+mkdir -p "$staging/context-nonfree.tds/tex/context/fonts/mkiv/"
 mv \
     "$staging/context.tds/tex/context/fonts/mkiv/"*{cambria,koeiel,lucida,mathtimes,minion}*.lfg \
-    "$staging/context-nonfree.tds/tex/context/nonfree/fonts/"
+    "$staging/context-nonfree.tds/tex/context/fonts/mkiv/"
 
 # The following files are acceptable to include in TeX Live, but Hans
 # specifically requested (2025-05-29) that we not include any files that depend
@@ -476,7 +476,7 @@ mv \
 # with the goodie files missing and get poor output quality as a result.
 mv \
     "$staging/context.tds/tex/context/fonts/mkiv/type-imp-"{cambria,koeielettersot,lucida,lucida-typeone,mathtimes,minion,mscore}.mkiv \
-    "$staging/context-nonfree.tds/tex/context/nonfree/fonts/"
+    "$staging/context-nonfree.tds/tex/context/fonts/mkiv/"
 
 
 #####################
@@ -623,43 +623,43 @@ cp -a "$packaging/"{texexec,texmfstart}.cmd \
 # (handled by TeX Live itself)
 
 # Non-free
-mkdir -p "$staging/context-nonfree.tds/fonts/enc/pdftex/context-nonfree/"
+mkdir -p "$staging/context-nonfree.tds/fonts/enc/pdftex/context/"
 mv \
     "$staging/context-legacy.tds/fonts/enc/pdftex/context/koe"* \
-    "$staging/context-nonfree.tds/fonts/enc/pdftex/context-nonfree/"
+    "$staging/context-nonfree.tds/fonts/enc/pdftex/context/"
 
 mkdir -p "$staging/context-nonfree.tds/fonts/map/pdftex/context/"
 mv \
     "$staging/context-legacy.tds/fonts/map/pdftex/context/koe"* \
-    "$staging/context-nonfree.tds/fonts/map/pdftex/context-nonfree/"
+    "$staging/context-nonfree.tds/fonts/map/pdftex/context/"
 
-mkdir -p "$staging/context-nonfree.tds/fonts/enc/dvips/context-nonfree/"
+mkdir -p "$staging/context-nonfree.tds/fonts/enc/dvips/context/"
 mv \
     "$staging/context-legacy.tds/fonts/enc/dvips/context/teff-trinite.enc" \
-    "$staging/context-nonfree.tds/fonts/enc/dvips/context-nonfree/"
+    "$staging/context-nonfree.tds/fonts/enc/dvips/context/"
 
-mkdir -p "$staging/context-nonfree.tds/fonts/afm/public/context-nonfree/"
+mkdir -p "$staging/context-nonfree.tds/fonts/afm/public/context/"
 cp -a \
     "$legacy_source/fonts/afm/hoekwater/koeieletters/"* \
-    "$staging/context-nonfree.tds/fonts/afm/public/context-nonfree/"
+    "$staging/context-nonfree.tds/fonts/afm/public/context/"
 
-mkdir -p "$staging/context-nonfree.tds/fonts/tfm/public/context-nonfree/"
+mkdir -p "$staging/context-nonfree.tds/fonts/tfm/public/context/"
 cp -a \
     "$legacy_source/fonts/tfm/hoekwater/koeieletters/"* \
-    "$staging/context-nonfree.tds/fonts/tfm/public/context-nonfree/"
+    "$staging/context-nonfree.tds/fonts/tfm/public/context/"
 
-mkdir -p "$staging/context-nonfree.tds/fonts/type1/public/context-nonfree/"
+mkdir -p "$staging/context-nonfree.tds/fonts/type1/public/context/"
 cp -a \
     "$legacy_source/fonts/type1/hoekwater/koeieletters/"* \
-    "$staging/context-nonfree.tds/fonts/type1/public/context-nonfree/"
+    "$staging/context-nonfree.tds/fonts/type1/public/context/"
 mv \
     "$staging/context-legacy.tds/fonts/type1/public/context/koeieletters.pfm" \
-    "$staging/context-nonfree.tds/fonts/type1/public/context-nonfree/koeieletters.pfm"
+    "$staging/context-nonfree.tds/fonts/type1/public/context/koeieletters.pfm"
 
-mkdir -p "$staging/context-nonfree.tds/fonts/vf/public/context-nonfree/"
+mkdir -p "$staging/context-nonfree.tds/fonts/vf/public/context/"
 cp -a \
     "$legacy_source/fonts/vf/hoekwater/koeieletters/"* \
-    "$staging/context-nonfree.tds/fonts/vf/public/context-nonfree/"
+    "$staging/context-nonfree.tds/fonts/vf/public/context/"
 
 
 ###############
