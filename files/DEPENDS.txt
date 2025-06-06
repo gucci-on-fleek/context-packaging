@@ -70,6 +70,10 @@ hard context
 hard pdftex
 soft xetex
 
+# Some of the core .mkii files have been moved to the "mptopdf" package,
+# meaning that ConTeXt MkII will not work without it.
+hard mptopdf
+
 # Once again, Latin Modern is the default font for ConTeXt MkII.
 hard lm  # lm*.pfm, etc.
 
@@ -100,10 +104,6 @@ package context-nonfree
 # want MkIV/MkXL, and only maybe want MkII.
 hard context
 soft context-legacy
-
-# Some of the core .mkii files have been moved to the "mptopdf" package,
-# meaining that ConTeXt MkII will not work without it.
-hard mptopdf
 
 
 ###############

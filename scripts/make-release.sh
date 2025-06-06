@@ -478,6 +478,11 @@ mv \
     "$staging/context.tds/tex/context/fonts/mkiv/type-imp-"{cambria,koeielettersot,lucida,lucida-typeone,mathtimes,minion,mscore}.mkiv \
     "$staging/context-nonfree.tds/tex/context/fonts/mkiv/"
 
+# Documentation
+mkdir -p "$staging/context-nonfree.tds/doc/context/"
+cp -a "$packaging/README-NONFREE.md" \
+    "$staging/context-nonfree.tds/doc/context/"
+
 
 #####################
 ### Legacy (MkII) ###
@@ -731,10 +736,33 @@ find "$staging/" -type f \( -iname '*.cmd' -o -iname '*.bat' \) -print0 | \
 find "$staging/context.bin/" -print0 | \
     xargs -0 touch --no-dereference --date="@$SOURCE_DATE_EPOCH"
 
-# Now, we'll zip up every tree individually.
+# Manually zip up the LuaMetaTeX source code first so that we can add it to the
+# TDS archive.
+cd "$staging/luametatex.src/"
+
+zip --quiet --no-dir-entries --strip-extra --symlinks --recurse-paths \
+    "$output/luametatex.src.zip" ./*
+
+add-determinism "$output/luametatex.src.zip"
+
+cd "$root/"
+
+# Now we can copy the zipped LuaMetaTeX source code to the TDS archive.
+mkdir -p "$staging/context.tds/source/context/base/"
+cp -a "$output/luametatex.src.zip" \
+    "$staging/context.tds/source/context/base/luametatex-$luametatex_version.zip"
+
+# Next, we'll zip up every tree individually.
 cd "$staging/"
 for folder in ./*; do
     folder_name="$(basename "$folder")"
+
+    # Skip if the zip file already exists.
+    if [ -f "$output/$folder_name.zip" ]; then
+        echo "Skipping $folder_name, zip file already exists."
+        continue
+    fi
+
     cd "$staging/$folder_name/"
     zip --quiet --no-dir-entries --strip-extra --symlinks --recurse-paths \
         "$output/$folder_name.zip" ./*
@@ -897,6 +925,7 @@ cp -a "$packaging/README-BINARIES.md" \
 sed -i '/BEGIN github/,/END github/d; /LINKS ctan/d' \
     "$staging/context.ctan/context/archives/INSTALLING.md" \
     "$staging/context.ctan/context/bin/README.md" \
+    "$staging/context.ctan/context/doc/README-NONFREE.md" \
     "$staging/context.ctan/context/doc/README-PACKAGING.md" \
     "$staging/context.ctan/context/README.md"
 
