@@ -12,10 +12,6 @@ Distribution](https://wiki.contextgarden.net/Introduction/Installation)
 into [TeX Live](https://tug.org/texlive/pkgcontrib.html) and
 [CTAN](https://www.ctan.org/pkg/context).
 
-Note that this project only packages the newer MkIV (LuaTeX) and MkXL
-(LuaMetaTeX) formats; the legacy MkII (pdfTeX and XeTeX) formats are
-packaged by the TeX Live maintainers directly.
-
 
 Goals
 -----
