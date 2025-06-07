@@ -45,6 +45,15 @@ users will have a complete ConTeXt installation by default.
    document with
    [`\setuppapersize`](https://wiki.contextgarden.net/Command/setuppapersize).
 
+2. The ConTeXt Standalone Distribution frequently updates its LuaTeX
+   binaries to the latest release; TeX Live only updates its LuaTeX
+   binaries once per year. LuaTeX is
+   [mostly](https://tug.org/TUGboat/tb41-3/tb129scarso-luatex.pdf)
+   [frozen](https://www.luatex.org/roadmap.html#:~:text=In%202023,not%20be%20extended%2E),
+   so this should generally make no difference. Regardless, the distinct
+   LuaMetaTeX engine will be updated multiple times per year in
+   TeX Live, just like the ConTeXt Standalone Distribution.
+
 Any other differences from the ConTeXt Standalone Distribution are
 considered bugs, so if you find any deviations in this package, please
 let me know, and I will fix it for the next release.
