@@ -750,7 +750,7 @@ cd "$root/"
 # Now we can copy the zipped LuaMetaTeX source code to the TDS archive.
 mkdir -p "$staging/context.tds/source/context/base/"
 cp -a "$output/luametatex.src.zip" \
-    "$staging/context.tds/source/context/base/luametatex-$luametatex_version.zip"
+    "$staging/context.tds/source/context/base/luametatex-$luametatex_version.src.zip"
 
 # Next, we'll zip up every tree individually.
 cd "$staging/"

@@ -10,7 +10,16 @@ This repository hosts the scripts used to package the contents of the
 [ConTeXt Standalone
 Distribution](https://wiki.contextgarden.net/Introduction/Installation)
 into [TeX Live](https://tug.org/texlive/pkgcontrib.html) and
-[CTAN](https://www.ctan.org/pkg/context).
+[CTAN](https://www.ctan.org/).
+
+Specifically, this is the source of the [CTAN package
+`context`](https://www.ctan.org/pkg/context), which contains the [TeX
+Live](https://tug.org/texlive/) packages `context` (ConTeXt MkXL/LMTX
+runtime TeX files), `context.ARCH` (LuaMetaTeX binaries),
+`context-legacy` (ConTeXt MkII runtime TeX files), and `mptopdf`
+(`mptopdf` command-line script), and the
+[TLContrib](https://contrib.texlive.info/) package `context-nonfree`
+(ConTeXt runtime files that are not free software).
 
 
 Goals
@@ -26,8 +35,19 @@ Note that `scheme-full` (<abbr>AKA</abbr> the default “Full” TeX Live
 installation) is a superset of `scheme-context`, which means that most
 users will have a complete ConTeXt installation by default.
 
-I consider any deviations from this goal to be bugs, so if you find any
-differences, please let me know!
+### Known Deviations
+
+1. The ConTeXt Standalone Distribution always sets the default paper
+   size to [A4](https://en.wikipedia.org/wiki/A4_paper); TeX Live allows
+   users to configure this to either A4 or
+   [Letter](https://en.wikipedia.org/wiki/Letter_(paper_size)).
+   Regardless, users may (and should) configure this for each individual
+   document with
+   [`\setuppapersize`](https://wiki.contextgarden.net/Command/setuppapersize).
+
+Any other differences from the ConTeXt Standalone Distribution are
+considered bugs, so if you find any deviations in this package, please
+let me know, and I will fix it for the next release.
 
 
 Architecture
@@ -103,10 +123,10 @@ if you insist on installing manually, please refer to
 Licence
 -------
 
-The vast majority of files in the zip files originate from ConTeXt
+The vast majority of files in the zip archives originate from ConTeXt
 itself; please see
-[`doc/context/documents/general/manuals/mreadme.pdf`][mreadme.pdf]
-for details on their licensing. The files directly contained in this
+[`doc/context/documents/general/manuals/mreadme.pdf`][mreadme.pdf] for
+details on their licensing. The files directly contained in this
 repository are placed in the public domain.
 
 
