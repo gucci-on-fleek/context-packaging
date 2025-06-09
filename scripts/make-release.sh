@@ -28,6 +28,7 @@ texlive="/opt/texlive/"
 declare -A context_platforms=(
     ["freebsd-amd64"]="amd64-freebsd"
     ["linux-64"]="x86_64-linux"
+    ["linux-aarch64"]="aarch64-linux"
     ["linux"]="i386-linux"
     ["linuxmusl-64"]="x86_64-linuxmusl"
     ["openbsd-amd64"]="amd64-openbsd73" # Officially supported by ConTeXt, but
@@ -41,7 +42,6 @@ declare -A context_platforms=(
 # These platforms aren't officially supported by the ConTeXt installer, but the
 # ConTeXt Build Farm builds binaries for them, so we can manually add them here.
 luametatex_platforms=(
-    "aarch64-linux"
     "armhf-linux"
     "i386-freebsd"
     "i386-solaris"
