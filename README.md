@@ -54,6 +54,14 @@ users will have a complete ConTeXt installation by default.
    LuaMetaTeX engine will be updated multiple times per year in
    TeX Live, just like the ConTeXt Standalone Distribution.
 
+3. The ConTeXt Standalone Distribution permits documents to run
+   arbitrary executables while compiling; TeX Live attempts to restrict
+   this to a handful of known-safe programs. Note that this is provided
+   as a convenience feature only, and is **NOT** a security feature.
+   Users must not compile untrusted ConTeXt documents without using
+   external sandboxing mechanisms (Docker, Bubblewrap, systemd-run,
+   etc.).
+
 Any other differences from the ConTeXt Standalone Distribution are
 considered bugs, so if you find any deviations in this package, please
 let me know, and I will fix it for the next release.

@@ -52,7 +52,10 @@ else -- Linux, BSD, etc.
     "
 end
 
--- Programs that should be allowed to run in restricted mode.
+-- Programs that should be allowed to run in restricted mode. Note that this is
+-- provided as a convenience feature only, and is **NOT** a security feature.
+-- Users must not compile untrusted ConTeXt documents without using external
+-- sandboxing mechanisms (Docker, Bubblewrap, systemd-run, etc.).
 local allowed_programs = table.concat({
     "bibtex",
     "bibtex8",
