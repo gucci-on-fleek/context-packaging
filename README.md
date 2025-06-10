@@ -62,6 +62,10 @@ users will have a complete ConTeXt installation by default.
    external sandboxing mechanisms (Docker, Bubblewrap, systemd-run,
    etc.).
 
+4. The ConTeXt Standalone Distribution distributes lexers/themes/plugins
+   for various editors; TeX Live omits these files since editor support
+   is outside its purview.
+
 Any other differences from the ConTeXt Standalone Distribution are
 considered bugs, so if you find any deviations in this package, please
 let me know, and I will fix it for the next release.

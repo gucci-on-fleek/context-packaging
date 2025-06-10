@@ -448,6 +448,11 @@ mkdir -p "$staging/context.tds/web2c/"
 cp -a "$packaging/texmfcnf.lua" \
     "$staging/context.tds/web2c/texmfcnf.lua"
 
+# The lexers used by the SciTE editor are also used by ConTeXt itself.
+mkdir -p "$staging/context.tds/tex/context/"
+cp -a "$source/texmf-context/context/data/scite/context/lexers/" \
+    "$staging/context.tds/tex/context/lexers/"
+
 
 ######################
 ### Non-free files ###
