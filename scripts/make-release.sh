@@ -41,6 +41,7 @@ declare -A context_platforms=(
 
 # These platforms aren't officially supported by the ConTeXt installer, but the
 # ConTeXt Build Farm builds binaries for them, so we can manually add them here.
+# shellcheck disable=SC2034
 luametatex_platforms=(
     "armhf-linux"
     "i386-freebsd"
@@ -143,7 +144,7 @@ mkdir -p "$staging/context-nonfree.tds/"
 mkdir -p "$staging/mptopdf.tds/"
 
 # Create folders for each platform in a separate binaries tree.
-for tl_platform in "${context_platforms[@]}" "${luametatex_platforms[@]}"; do
+for tl_platform in "${context_platforms[@]}"; do
     mkdir -p "$staging/context.bin/$tl_platform/"
 done
 
@@ -185,27 +186,6 @@ for ctx_platform in "${!context_platforms[@]}"; do
     # We don't want to overwrite TL's luatex. With a trailing asterisk to get
     # the ".exe" for Windows.
     rm -f "$staging/context.bin/$tl_platform/luatex"*
-done
-
-# Now, let's handle the binaries for the unsupported platforms.
-for tl_platform in "${luametatex_platforms[@]}"; do
-    # Download the binaries from the ConTeXt Build Farm
-    curl -sSL \
-        "https://build.contextgarden.net/dl/luametatex/work/$tl_platform/luametatex" \
-        -o "$staging/context.bin/$tl_platform/luametatex"
-
-    # Symbolic links
-    ln -s luametatex \
-        "$staging/context.bin/$tl_platform/mtxrun"
-
-    ln -s luametatex \
-        "$staging/context.bin/$tl_platform/context"
-
-    ln -sf ../../texmf-dist/scripts/context/lua/context.lua \
-        "$staging/context.bin/$tl_platform/context.lua"
-
-    ln -sf ../../texmf-dist/scripts/context/lua/mtxrun.lua \
-        "$staging/context.bin/$tl_platform/mtxrun.lua"
 done
 
 # The ConTeXt Standalone Distribution uses separate x86_64 and arm64 binaries
@@ -916,7 +896,7 @@ find "$staging/luametatex.src/" \
 
 # And the binaries.
 mkdir -p "$staging/context.ctan/context/bin/"
-for tl_platform in "${context_platforms[@]}" "${luametatex_platforms[@]}"; do
+for tl_platform in "${context_platforms[@]}"; do
     # Trailing asterisk to get the ".exe" for Windows.
     cp -a "$staging/context.bin/$tl_platform/luametatex"* \
         "$staging/context.ctan/context/bin/luametatex-$tl_platform"
