@@ -27,6 +27,7 @@ steps:
           - ./output/context.bin.zip
           - ./output/context-nonfree.tds.zip
           - ./output/context-legacy.tds.zip
+          - ./output/luametatex.src.zip
         file-exists: fail
         api_key:
             from_secret: GITHUB_TOKEN

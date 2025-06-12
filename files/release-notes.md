@@ -24,3 +24,7 @@
 - `context-legacy.tds.zip` is the TDS-compliant archive that contains
   all the runtime files used by the now-obsolete MkII version of
   ConTeXt.
+
+- `luametatex.src.zip` is an archive that contains the C source code and
+  cmake build scripts used to build the binaries contained in
+  `context.bin.zip`.

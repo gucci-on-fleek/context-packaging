@@ -103,7 +103,7 @@ _context_version="$( \
     tr '.' '-'
 )"
 
-if [ "$_context_version" != "$only_version" ]; then
+if test "$_context_version" != "$only_version"; then
     echo "The ConTeXt version in the source code ($_context_version) does not match the version in the Git tag ($safe_version)."
     exit 1
 fi
@@ -743,7 +743,7 @@ for folder in ./*; do
     folder_name="$(basename "$folder")"
 
     # Skip if the zip file already exists.
-    if [ -f "$output/$folder_name.zip" ]; then
+    if test -f "$output/$folder_name.zip"; then
         echo "Skipping $folder_name, zip file already exists."
         continue
     fi
@@ -753,7 +753,7 @@ for folder in ./*; do
         "$output/$folder_name.zip" ./*
 
     # Make the zip files deterministic
-    if [ "$folder_name" != "context.bin" ]; then
+    if test "$folder_name" != "context.bin"; then
         # add-determinism breaks the symlinks, so only run it on the zips that
         # don't contain any symlinks.
         add-determinism "$output/$folder_name.zip"
@@ -1007,6 +1007,14 @@ rm -rf "${testing:?}/"
 #################
 ### Uploading ###
 #################
+
+# Only upload if we're running inside of Max's Woodpecker (since otherwise this
+# is probably just Max testing things, or maybe someone is testing this from a
+# fork).
+if test "$CI_REPO_URL" != "https://github.com/gucci-on-fleek/context-packaging"; then
+    echo "Skipping CTAN upload."
+    exit 0
+fi
 
 # Woodpecker will handle uploading the files to GitHub, but we need to manually
 # upload the files to CTAN here.
