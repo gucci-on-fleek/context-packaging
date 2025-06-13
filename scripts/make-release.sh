@@ -198,10 +198,18 @@ llvm-lipo -create \
     "$source/texmf-osx-64/bin/luametatex" \
     "$source/texmf-osx-arm64/bin/luametatex"
 
-# The ConTeXt Standalone Distribution is missing the symlinks for Windows, so
-# let's add them now.
-ln -s "./luametatex.exe" "$staging/context.bin/windows/mtxrun.exe" || true
-ln -s "./luametatex.exe" "$staging/context.bin/windows/context.exe" || true
+# TeX Live doesn't like symlinks on Windows, so let's convert them to copies.
+cp -a "$staging/context.bin/windows/luametatex.exe" \
+    "$staging/context.bin/windows/mtxrun.exe"
+
+cp -a "$staging/context.bin/windows/luametatex.exe" \
+    "$staging/context.bin/windows/context.exe"
+
+cp -a "$source/texmf-context/scripts/context/lua/mtxrun.lua" \
+    "$staging/context.bin/windows/mtxrun.lua"
+
+cp -a "$source/texmf-context/scripts/context/lua/context.lua" \
+    "$staging/context.bin/windows/context.lua"
 
 
 #############
