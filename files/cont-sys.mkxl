@@ -12,5 +12,11 @@
 % need to include the module here.
 \usemodule[texlive]
 
+% But if we've recently updated, then ConTeXt won't have m-texlive.mkxl in its
+% filename cache!
+\doifnotfile{m-texlive.mkxl}{
+    \ctxlua{resolvers.renewcache() resolvers.load()}
+}
+
 % Set the default paper size
 \readsysfile{context-papersize.tex}{}{}
