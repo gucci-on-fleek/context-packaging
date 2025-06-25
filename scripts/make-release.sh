@@ -199,6 +199,12 @@ llvm-lipo -create \
     "$source/texmf-osx-arm64/bin/luametatex"
 
 # TeX Live doesn't like symlinks on Windows, so let's convert them to copies.
+rm -f \
+    "$staging/context.bin/windows/mtxrun.exe" \
+    "$staging/context.bin/windows/context.exe" \
+    "$staging/context.bin/windows/mtxrun.lua" \
+    "$staging/context.bin/windows/context.lua"
+
 cp -a "$staging/context.bin/windows/luametatex.exe" \
     "$staging/context.bin/windows/mtxrun.exe"
 
