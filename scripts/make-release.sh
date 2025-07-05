@@ -85,7 +85,7 @@ scripts="$root/scripts/"
 ##################
 
 # The version of ConTeXt that we're packaging, with no spaces or colons.
-safe_version="$(git describe --exact-match --tags)"
+safe_version="$(git tag --sort=-refname:short --points-at @ | head -n 1)"
 
 # The version of ConTeXt that we're packaging, with spaces and colons.
 pretty_version="$(\
