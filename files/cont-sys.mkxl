@@ -18,5 +18,14 @@
     \ctxlua{resolvers.renewcache() resolvers.load()}
 }
 
+% MkIV won't load MkXL files, but we need m-texlive.mkxl for the filename cache
+% code to be loaded. Until a MkIV file is added, let's load the MkXL file and
+% hope for no errors.
+\doifnotmode{lmtx}{
+    \doifnotfile{m-texlive.mkiv}{
+        \input{sys:///m-texlive.mkxl}
+    }
+}
+
 % Set the default paper size
 \readsysfile{context-papersize.tex}{}{}
