@@ -730,6 +730,9 @@ grep --recursive --files-with-matches --null '^#!/' "$staging/" | \
 find "$staging/" -type f \( -iname '*.cmd' -o -iname '*.bat' \) -print0 | \
     xargs -0 chmod a+x
 
+chmod a+x \
+    "$staging/mptopdf.tds/scripts/context/perl/mptopdf.pl"
+
 # Reset the date on all the files in context.bin/ since we can't use
 # add-determinism there.
 find "$staging/context.bin/" -print0 | \
