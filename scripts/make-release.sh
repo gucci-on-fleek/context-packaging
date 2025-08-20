@@ -1014,7 +1014,25 @@ pdftotext -layout -enc UTF-8 context-cache.pdf - \
 git diff --no-index --ignore-all-space --exit-code \
     "$packaging/context-cache.txt" \
     "$testing/tests/context-cache.txt" \
-    || (echo "The test failed!" && exit 1)
+    || (echo "The MkXL test failed!" && exit 1)
+
+# Do it again for MkIV.
+rm "$testing/tests/context-cache."{pdf,tuc,log}
+
+mtxrun --luatex --generate > /dev/null
+context --luatex --make > /dev/null
+
+context --luatex context-cache.tex > /dev/null || \
+    (cat context-cache.log && exit 1)
+
+pdftotext -layout -enc UTF-8 context-cache.pdf - \
+    | sed -zE 's/([[:space:]]){2,}/\1/g' | tr '\f' '\n' \
+    > "$testing/tests/context-cache.txt"
+
+git diff --no-index --ignore-all-space --exit-code \
+    "$packaging/context-cache.txt" \
+    "$testing/tests/context-cache.txt" \
+    || (echo "The MkIV test failed!" && exit 1)
 
 # We're done, so let's clean up.
 cd "$root/"
