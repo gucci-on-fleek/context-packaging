@@ -968,6 +968,10 @@ unzip -q context.bin.zip
 rm -f context.bin.zip
 cd "$root/"
 
+# And copy over LuaTeX from TeX Live.
+cp -a "$texlive/bin/x86_64-linux/"{luatex,texlua} \
+    "$testing/bin/x86_64-linux/"
+
 # Now, we'll unzip the TEXMF tree.
 mkdir -p "$testing/texmf-dist/"
 cd "$testing/texmf-dist/"
@@ -1009,17 +1013,17 @@ context context-cache.tex > /dev/null || \
 # And compare the output to the expected output.
 pdftotext -layout -enc UTF-8 context-cache.pdf - \
     | sed -zE 's/([[:space:]]){2,}/\1/g' | tr '\f' '\n' \
-    > "$testing/tests/context-cache.txt"
+    > "$testing/tests/context-cache-mkxl.txt"
 
 git diff --no-index --ignore-all-space --exit-code \
-    "$packaging/context-cache.txt" \
-    "$testing/tests/context-cache.txt" \
+    "$packaging/context-cache-mkxl.txt" \
+    "$testing/tests/context-cache-mkxl.txt" \
     || (echo "The MkXL test failed!" && exit 1)
 
 # Do it again for MkIV.
 rm "$testing/tests/context-cache."{pdf,tuc,log}
 
-mtxrun --luatex --generate > /dev/null
+texlua "$testing/bin/x86_64-linux/mtxrun.lua" --luatex --generate > /dev/null
 context --luatex --make > /dev/null
 
 context --luatex context-cache.tex > /dev/null || \
@@ -1027,11 +1031,11 @@ context --luatex context-cache.tex > /dev/null || \
 
 pdftotext -layout -enc UTF-8 context-cache.pdf - \
     | sed -zE 's/([[:space:]]){2,}/\1/g' | tr '\f' '\n' \
-    > "$testing/tests/context-cache.txt"
+    > "$testing/tests/context-cache-mkiv.txt"
 
 git diff --no-index --ignore-all-space --exit-code \
-    "$packaging/context-cache.txt" \
-    "$testing/tests/context-cache.txt" \
+    "$packaging/context-cache-mkiv.txt" \
+    "$testing/tests/context-cache-mkiv.txt" \
     || (echo "The MkIV test failed!" && exit 1)
 
 # We're done, so let's clean up.
