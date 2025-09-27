@@ -1055,8 +1055,9 @@ if test "$CI_REPO_URL" != "https://github.com/gucci-on-fleek/context-packaging";
     exit 0
 fi
 
-# Woodpecker will handle uploading the files to GitHub, but we need to manually
-# upload the files to CTAN here.
-curl --no-progress-meter --fail --verbose \
-    --config "$scripts/ctan-upload.ini" || \
-    (echo "CTAN upload failed: $?" && exit 1)
+# TODO: Re-enable CTAN uploading
+# # Woodpecker will handle uploading the files to GitHub, but we need to manually
+# # upload the files to CTAN here.
+# curl --no-progress-meter --fail --verbose \
+#     --config "$scripts/ctan-upload.ini" || \
+#     (echo "CTAN upload failed: $?" && exit 1)
