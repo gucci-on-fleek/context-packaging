@@ -26,7 +26,6 @@ texlive="/opt/texlive/"
 
 # A mapping from the ConTeXt platform names to TeX Live platform names.
 declare -A context_platforms=(
-    ["freebsd-amd64"]="amd64-freebsd"
     ["linux-64"]="x86_64-linux"
     ["linux-aarch64"]="aarch64-linux"
     ["linux"]="i386-linux"
@@ -44,7 +43,6 @@ declare -A context_platforms=(
 # shellcheck disable=SC2034
 luametatex_platforms=(
     "armhf-linux"
-    "i386-freebsd"
     "i386-solaris"
     "sparc-solaris"  # Built by the Build Farm, but not supported by TeX Live.
     "x86_64-solaris"
@@ -53,7 +51,9 @@ luametatex_platforms=(
 # No binaries for these platforms unfortunately.
 # shellcheck disable=SC2034
 missing_platforms=(
+    "amd64-freebsd"  # ConTeXt Build Farm builder is broken
     "amd64-netbsd"  # ConTeXt Build Farm builder is broken
+    "i386-freebsd"  # ConTeXt Build Farm builder is broken
     "i386-netbsd"  # Not built by the Build Farm
     "x86_64-cygwin"  # Not built by the Build Farm
 )
