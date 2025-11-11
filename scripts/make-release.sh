@@ -704,7 +704,7 @@ cp "$staging/mptopdf.tds/doc/context/scripts/mkii/mptopdf.man" \
 ###############
 
 # Some files have \r\n line endings, so let's fix them up.
-find "$staging/" -type f -print0 | xargs -0 dos2unix --safe > /dev/null 2>&1
+find "$staging/" -type f -print0 | xargs -0 dos2unix --verbose --safe > /dev/null 2>&1
 
 # Remove any empty folders that were created by the packaging script.
 find "$staging/" -type d -empty -delete
