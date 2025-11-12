@@ -121,6 +121,7 @@ SOURCE_DATE_EPOCH="$(\
 )"
 export SOURCE_DATE_EPOCH
 export FORCE_SOURCE_DATE=1
+export TZ="UTC"
 
 
 ###############
@@ -1055,9 +1056,9 @@ if test "$CI_REPO_URL" != "https://github.com/gucci-on-fleek/context-packaging";
     exit 0
 fi
 
-# TODO: Re-enable CTAN uploading
-# # Woodpecker will handle uploading the files to GitHub, but we need to manually
-# # upload the files to CTAN here.
-# curl --no-progress-meter --fail --verbose \
-#     --config "$scripts/ctan-upload.ini" || \
-#     (echo "CTAN upload failed: $?" && exit 1)
+# Woodpecker will handle uploading the files to GitHub, but we need to manually
+# upload the files to CTAN here.
+curl --fail \
+    --verbose --trace-time --progress-meter --no-buffer --output /dev/stderr \
+    --config "$scripts/ctan-upload.ini" || \
+    (echo "CTAN upload failed: $?" && exit 1)
