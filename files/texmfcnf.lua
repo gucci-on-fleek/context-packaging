@@ -2,7 +2,7 @@
 -- https://github.com/gucci-on-fleek/context-packaging
 -- SPDX-License-Identifier: GPL-2.0-or-later
 -- SPDX-FileCopyrightText: 2024 Hans Hagen
--- SPDX-FileCopyrightText: 2025 Max Chernoff
+-- SPDX-FileCopyrightText: 2026 Max Chernoff
 
 -- Note that this file will be overwritten on upgrades, so users should place
 -- any modifications in another location!
@@ -12,13 +12,20 @@
 -- what you are doing).
 
 --- BEGIN RECOMMENDED MODIFICATIONS SECTION ---
+
+-- Information about who provided this installation of ConTeXt. If you modify
+-- this file (or any of the other ConTeXt files) and redistribute these changes,
+-- you should also change these values to something informative.
+local provider_name = "TeX Live 2026"
+local report_bugs_to = "https://github.com/gucci-on-fleek/context-packaging"
+
 -- The location of the distribution's TEXMF tree. The contents stored in this
 -- path should not be modified by users.
-local distribution = "selfautoparent:texmf-dist"
+local distribution_path = "selfautoparent:texmf-dist"
 
 -- Where ConTeXt should store any caches.
 local system_cache = "selfautoparent:"
-local user_cache   = "home:.texlive2025"
+local user_cache   = "home:.texlive2026"
 
 -- Where ConTeXt should search for custom files.
 local system_data = "selfautoparent:../texmf-local"
@@ -82,10 +89,15 @@ return {
     author  = "Hans Hagen & Max Chernoff",
     target  = "texlive",
 
+    -- These two entries aren't used by anything yet, but they're placed here in
+    -- case the core ConTeXt code wants to use it to blame me for any issues :)
+    provider_name = provider_name,
+    report_bugs_to = report_bugs_to,
+
     content = {
         variables = {
             -- System trees
-            TEXMFDIST      = distribution,
+            TEXMFDIST      = distribution_path,
             TEXMFLOCAL     = system_data,
             TEXMFSYSCONFIG = system_cache .. "/texmf-config",
             TEXMFSYSVAR    = system_cache .. "/texmf-var",
