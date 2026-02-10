@@ -15,9 +15,19 @@
 
 -- Information about who provided this installation of ConTeXt. If you modify
 -- this file (or any of the other ConTeXt files) and redistribute these changes,
--- you should also change these values to something informative.
-local provider_name = "TeX Live 2026"
+-- you should also change these values to something appropriate for your
+-- distribution.
+local distribution_name = "TeX Live"
 local report_bugs_to = "https://github.com/gucci-on-fleek/context-packaging"
+
+-- Sometimes TeX Live needs to release more than one update for a single
+-- upstream ConTeXt release, so TeX Live adds a single uppercase letter suffix
+-- to the version number for each update. A suffix of "A" indicates the first
+-- release (this is the most common case), "B" indicates the second release, and
+-- so on. If you are a downstream distributor, you can use this field for your
+-- own purposes; any string is valid, but it should be unique for each release
+-- for any given upstream version of ConTeXt.
+local distribution_revision = "@@distribution_revision@@"
 
 -- The location of the distribution's TEXMF tree. The contents stored in this
 -- path should not be modified by users.
@@ -62,7 +72,9 @@ end
 -- Programs that should be allowed to run in restricted mode. Note that this is
 -- provided as a convenience feature only, and is **NOT** a security feature.
 -- Users must not compile untrusted ConTeXt documents without using external
--- sandboxing mechanisms (Docker, Bubblewrap, systemd-run, etc.).
+-- sandboxing mechanisms (Docker, Bubblewrap, systemd-run, etc.). ConTeXt runs
+-- in unrestricted mode by default, meaning that this list is ignored entirely
+-- and documents can freely execute arbitrary programs.
 local allowed_programs = table.concat({
     "bibtex",
     "bibtex8",
@@ -81,6 +93,8 @@ local allowed_programs = table.concat({
 --- END RECOMMENDED MODIFICATIONS SECTION ---
 
 return {
+    -- Metadata about this configuration file. (Copied from the original
+    -- "texlivecnf.lua" file in the upstream ConTeXt Standalone Distribution.)
     type    = "configuration",
     version = "1.1.3",
     date    = "2024-02-10",
@@ -89,12 +103,23 @@ return {
     author  = "Hans Hagen & Max Chernoff",
     target  = "texlive",
 
-    -- These two entries aren't used by anything yet, but they're placed here in
-    -- case the core ConTeXt code wants to use it to blame me for any issues :)
-    provider_name = provider_name,
+    -- These next four entries aren't used by anything (yet), but they're placed
+    -- here in case the core ConTeXt code wants to use it to blame me for any
+    -- issues :)
+    distribution_name = distribution_name,
     report_bugs_to = report_bugs_to,
+    distribution_revision = distribution_revision,
 
+    -- In case distributors have modified the above three variables, we'll add a
+    -- static variable here so that it's clear whether this file was based
+    -- directly off of the original "texmfcnf.lua" file from the upstream
+    -- ConTeXt Standalone Distribution, or from the TeX Live distribution's
+    -- modified version.
+    derived_from = "TeX Live (@@texlive_version@@)",
+
+    -- Here are the "real" variables that affect ConTeXt's runtime behaviour.
     content = {
+        -- File/directory locations
         variables = {
             -- System trees
             TEXMFDIST      = distribution_path,
@@ -140,8 +165,8 @@ return {
                           "$TEXMF/tex/context/colors//;$OSCOLORDIR",
         },
 
-        -- Copied from the original ConTeXt file; don't change these unless you
-        -- know what you are doing!
+        -- Engine parameters. These were copied from the original ConTeXt file;
+        -- don't change these unless you know what you are doing!
         directives = {
             -- LuaMetaTeX engine parameters
             ["luametatex.errorlinesize"]     = { size =      250                 }, -- max =       255

@@ -96,6 +96,9 @@ pretty_version="$(\
 # The version of ConTeXt itself, without the suffix for my interim releases.
 only_version="$(echo "$pretty_version" | sed -E 's/ [[:upper:]]$//')"
 
+# The suffix by itself
+version_suffix="$(echo "$pretty_version" | grep -oP '(?<= )[[:upper:]]$')"
+
 # Make sure that we're running against the correct version of ConTeXt.
 _context_version="$( \
     grep -oP '(?<=def\\contextversion\{)(\d{4}\.\d{2}\.\d{2} \d{2}:\d{2})' \
@@ -441,6 +444,12 @@ cp -a "$source/texmf-context/metapost/" \
 # runtime parameters (much like the standard texmf.cnf file).
 mkdir -p "$staging/context.tds/web2c/"
 cp -a "$packaging/texmfcnf.lua" \
+    "$staging/context.tds/web2c/texmfcnf.lua"
+
+# Set the variables in texmfcnf.lua to the correct values for this release.
+sed -i \
+    -e "s/@@distribution_revision@@/$version_suffix/g" \
+    -e "s/@@texlive_version@@/$pretty_version/g" \
     "$staging/context.tds/web2c/texmfcnf.lua"
 
 # The lexers used by the SciTE editor are also used by ConTeXt itself.
