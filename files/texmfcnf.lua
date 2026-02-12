@@ -152,6 +152,7 @@ return {
             OPENTYPEFONTS   = ".;" .. nontex_fonts ..
                               "$TEXMF/fonts/opentype//;$OSFONTDIR",
             FONTCONFIG_PATH = "$TEXMFSYSVAR/fonts/conf",
+            OSFONTDIR       = nontex_fonts,
 
             -- Input locations: Lua
             TEXMFSCRIPTS = ".;$TEXMF/scripts/context//;$TEXINPUTS",
