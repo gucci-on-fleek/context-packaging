@@ -743,6 +743,11 @@ find "$staging/" -type f \( -iname '*.cmd' -o -iname '*.bat' \) -print0 | \
 chmod a+x \
     "$staging/mptopdf.tds/scripts/context/perl/mptopdf.pl"
 
+# This file uses a shebang in the middle, inside a verbatim buffer, but it's
+# not actually executable, so we'll remove the executable bit from it.
+chmod a-x \
+    "$staging/context.tds/doc/context/sources/general/manuals/tools/tools-mkiv.tex"
+
 # Reset the date on all the files in context.bin/ since we can't use
 # add-determinism there.
 find "$staging/context.bin/" -print0 | \
