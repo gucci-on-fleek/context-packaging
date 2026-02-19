@@ -448,8 +448,8 @@ cp -a "$packaging/texmfcnf.lua" \
 
 # Set the variables in texmfcnf.lua to the correct values for this release.
 sed -i \
-    -e "s/@@distribution_revision@@/$version_suffix/g" \
-    -e "s/@@texlive_version@@/$pretty_version/g" \
+    -e "s/@@package_revision@@/$version_suffix/g" \
+    -e "s/@@full_version@@/$pretty_version/g" \
     "$staging/context.tds/web2c/texmfcnf.lua"
 
 # The lexers used by the SciTE editor are also used by ConTeXt itself.

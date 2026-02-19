@@ -15,10 +15,17 @@
 
 -- Information about who provided this installation of ConTeXt. If you modify
 -- this file (or any of the other ConTeXt files) and redistribute these changes,
--- you should also change these values to something appropriate for your
+-- you should also change this value to something appropriate for your
 -- distribution.
 local distribution_name = "TeX Live"
-local report_bugs_to = "https://github.com/gucci-on-fleek/context-packaging"
+
+-- A URL where users can find more information about this distribution of
+-- ConTeXt, and especially where they can report bugs. Again, if you modify this
+-- file, you should also modify this field.
+local distribution_url = "https://github.com/gucci-on-fleek/context-packaging"
+
+-- The version of the distribution itself; unrelated to the version of ConTeXt.
+local distribution_version = "2026"
 
 -- Sometimes TeX Live needs to release more than one update for a single
 -- upstream ConTeXt release, so TeX Live adds a single uppercase letter suffix
@@ -26,22 +33,42 @@ local report_bugs_to = "https://github.com/gucci-on-fleek/context-packaging"
 -- release (this is the most common case), "B" indicates the second release, and
 -- so on. If you are a downstream distributor, you can use this field for your
 -- own purposes; any string is valid, but it should be unique for each release
--- for any given upstream version of ConTeXt.
-local distribution_revision = "@@distribution_revision@@"
+-- for any given upstream version of ConTeXt. This is just the suffix though, so
+-- the full version number looks something like "1950.02.10 15:41 A", where
+-- "1950.02.10 15:41" is the upstream version provided by ConTeXt itself and "A"
+-- is the suffix added by TeX Live.
+local package_revision = "@@package_revision@@"
+
+-- Distributions can place any additional information they want in this table,
+-- and it will be included in the "private" field of the "distribution" table.
+local distribution_private = {
+    -- example_field = "This is an example value.",
+}
 
 -- The location of the distribution's TEXMF tree. The contents stored in this
--- path should not be modified by users.
+-- path should not be modified by users, and are solely managed by the
+-- distribution itself.
 local distribution_path = "selfautoparent:texmf-dist"
 
--- Where ConTeXt should store any caches.
+-- Where ConTeXt should store any caches. There is a single "system" folder for
+-- the entire computer, and this folder is typically only writable by
+-- root/administrators. There is a separate "user" folder for each user, and
+-- users can freely modify these files. Note that at least one of these folders
+-- must be writable by ConTeXt at runtime, or else ConTeXt will refuse to run.
+-- These folders should be persistent (so not in a temporary directory);
+-- however, it is generally safe to delete them at any time.
 local system_cache = "selfautoparent:"
 local user_cache   = "home:.texlive2026"
 
--- Where ConTeXt should search for custom files.
+-- Where ConTeXt should search for custom files. "system" and "user" have the
+-- same meaning as above. ConTeXt will never write to or otherwise modify these
+-- files itself.
 local system_data = "selfautoparent:../texmf-local"
 local user_data   = "home:texmf"
 
--- The location of non-TeX files optionally used by ConTeXt.
+-- The location of non-TeX files optionally used by ConTeXt. Different paths are
+-- separated by semicolons (";"), and a trailing double slash ("//") indicates
+-- that the directory should be searched recursively.
 local nontex_fonts, nontex_colors
 if os.type == "windows" then
     nontex_fonts = "\z
@@ -103,19 +130,25 @@ return {
     author  = "Hans Hagen & Max Chernoff",
     target  = "texlive",
 
-    -- These next four entries aren't used by anything (yet), but they're placed
-    -- here in case the core ConTeXt code wants to use it to blame me for any
-    -- issues :)
-    distribution_name = distribution_name,
-    report_bugs_to = report_bugs_to,
-    distribution_revision = distribution_revision,
+    -- Metadata used to identify this distribution of ConTeXt.
+    distribution = {
+        name = distribution_name,
+        url = distribution_url,
+        distribution_version = distribution_version,
+        package_revision = package_revision,
 
-    -- In case distributors have modified the above three variables, we'll add a
-    -- static variable here so that it's clear whether this file was based
-    -- directly off of the original "texmfcnf.lua" file from the upstream
-    -- ConTeXt Standalone Distribution, or from the TeX Live distribution's
-    -- modified version.
-    derived_from = "TeX Live (@@texlive_version@@)",
+        -- In case distributors have modified the above three variables, we'll
+        -- add a static variable here so that it's clear whether this file was
+        -- based directly off of the original "texmfcnf.lua" file from the
+        -- upstream ConTeXt Standalone Distribution, or from the TeX Live
+        -- distribution's modified version. (It usually makes the most sense to
+        -- rely on the distributor-provided variables, so most users should
+        -- prefer inspecting the variables above instead of this one.)
+        derived_from = "TeX Live (@@full_version@@)",
+
+        -- Private metadata fields for use by users/distributors
+        private = distribution_private,
+    },
 
     -- Here are the "real" variables that affect ConTeXt's runtime behaviour.
     content = {
