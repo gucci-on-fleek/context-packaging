@@ -39,12 +39,6 @@ local distribution_version = "2026"
 -- is the suffix added by TeX Live.
 local package_revision = "@@package_revision@@"
 
--- Distributions can place any additional information they want in this table,
--- and it will be included in the "private" field of the "distribution" table.
-local distribution_private = {
-    -- example_field = "This is an example value.",
-}
-
 -- The location of the distribution's TEXMF tree. The contents stored in this
 -- path should not be modified by users, and are solely managed by the
 -- distribution itself.
@@ -131,23 +125,28 @@ return {
     target  = "texlive",
 
     -- Metadata used to identify this distribution of ConTeXt.
-    distribution = {
-        name = distribution_name,
+    details = {
+        name = distribution_name .. distribution_version,
         url = distribution_url,
-        distribution_version = distribution_version,
-        package_revision = package_revision,
+        version = package_revision,
+        comment = "Based off of TeX Live (@@full_version@@)",
 
-        -- In case distributors have modified the above three variables, we'll
-        -- add a static variable here so that it's clear whether this file was
-        -- based directly off of the original "texmfcnf.lua" file from the
-        -- upstream ConTeXt Standalone Distribution, or from the TeX Live
-        -- distribution's modified version. (It usually makes the most sense to
-        -- rely on the distributor-provided variables, so most users should
-        -- prefer inspecting the variables above instead of this one.)
-        derived_from = "TeX Live (@@full_version@@)",
+        -- Extra non-standard information
+        private = {
+            distribution_name = distribution_name,
+            distribution_version = distribution_version,
+            package_revision = package_revision,
 
-        -- Private metadata fields for use by users/distributors
-        private = distribution_private,
+            -- In case distributors have modified the above three variables,
+            -- we'll add a static variable here so that it's clear whether this
+            -- file was based directly off of the original "texmfcnf.lua" file
+            -- from the upstream ConTeXt Standalone Distribution, or from the
+            -- TeX Live distribution's modified version. (It usually makes the
+            -- most sense to rely on the distributor-provided variables, so most
+            -- users should prefer inspecting the variables above instead of
+            -- this one.)
+            derived_from = "TeX Live (@@full_version@@)",
+        }
     },
 
     -- Here are the "real" variables that affect ConTeXt's runtime behaviour.
