@@ -2,7 +2,7 @@
 # ConTeXt Packaging Scripts
 # https://github.com/gucci-on-fleek/context-packaging
 # SPDX-License-Identifier: CC0-1.0+
-# SPDX-FileCopyrightText: 2025 Max Chernoff
+# SPDX-FileCopyrightText: 2026 Max Chernoff
 set -euxo pipefail
 
 
@@ -78,6 +78,9 @@ testing="$root/testing/"
 
 # Where the build scripts are located.
 scripts="$root/scripts/"
+
+# A staging area for patched files.
+patched="$root/patched-files/"
 
 
 ##################
@@ -161,6 +164,31 @@ mkdir -p "$testing/"
 # The legacy source folder is where we'll find the original MkII files.
 mkdir -p "$legacy_source/"
 
+# A staging area for patched files.
+mkdir -p "$root/patched-files/"
+
+
+###############
+### Patches ###
+###############
+
+# We occasionally need to apply a few patches to the ConTeXt source code to make
+# it work better with TeX Live. In general, patching the source code should be
+# considered a last resort, so any patches here should be for short-term use
+# only.
+
+# Temporary workaround to prevent the
+#
+#     mtxrun          | unknown script 'mtx-context.lua' or 'mtx-mtx-context.lua'
+#
+# error from happening if no filename database is present.
+cp "$source/texmf-context/scripts/context/lua/mtxrun.lua" \
+    "$patched/mtxrun.lua"
+
+sed -i \
+    -e 's/environment.argument("autogenerate")/true/' \
+    "$patched/mtxrun.lua"
+
 
 ################
 ### Binaries ###
@@ -215,7 +243,7 @@ cp -a "$staging/context.bin/windows/luametatex.exe" \
 cp -a "$staging/context.bin/windows/luametatex.exe" \
     "$staging/context.bin/windows/context.exe"
 
-cp -a "$source/texmf-context/scripts/context/lua/mtxrun.lua" \
+cp -a "$patched/mtxrun.lua" \
     "$staging/context.bin/windows/mtxrun.lua"
 
 cp -a "$source/texmf-context/scripts/context/lua/context.lua" \
@@ -356,6 +384,10 @@ cp -a "$source/texmf-context/scripts/context/lua/" \
 # accidentally break their ConTeXt installation.
 rm "$staging/context.tds/scripts/context/lua/mtx-install"{,-modules}.lua
 
+# Install the patched "mtxrun.lua" script.
+cp "$patched/mtxrun.lua" \
+    "$staging/context.tds/scripts/context/lua/mtxrun.lua"
+
 
 ###########
 ### TeX ###
@@ -491,6 +523,16 @@ mv \
 mkdir -p "$staging/context-nonfree.tds/doc/context/"
 cp -a "$packaging/README-NONFREE.md" \
     "$staging/context-nonfree.tds/doc/context/"
+
+# The source for these files is not available as of 2026-02-28, and TL policy
+# requires that all PDF documentation is accompanied by the corresponding source
+# files (see point 3 of https://tug.org/texlive/pkgcontrib.html#requirements).
+# These files are otherwise permitted in TL, so if/when the sources are publicly
+# released, these files can be re-added back to the main package.
+mkdir -p "$staging/context-nonfree.tds/doc/context/documents/general/manuals/"
+mv \
+    "$staging/context.tds/doc/context/documents/general/manuals/mathincontext-"{screen,paper}.pdf \
+    "$staging/context-nonfree.tds/doc/context/documents/general/manuals/"
 
 
 #####################

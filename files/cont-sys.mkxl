@@ -1,7 +1,7 @@
 % ConTeXt Packaging Scripts
 % https://github.com/gucci-on-fleek/context-packaging
 % SPDX-License-Identifier: CC0-1.0+
-% SPDX-FileCopyrightText: 2025 Max Chernoff
+% SPDX-FileCopyrightText: 2026 Max Chernoff
 
 % This TeX Live-specific file updates the ConTeXt LMTX filename cache if the
 % system ls-R files are modified (typically by mktexlsr). It also sets the
@@ -12,20 +12,51 @@
 % need to include the module here.
 \usemodule[texlive]
 
-% But if we've recently updated, then ConTeXt won't have m-texlive.mkxl in its
-% filename cache!
-\doifnotfile{m-texlive.mkxl}{
-    \ctxlua{resolvers.renewcache() resolvers.load()}
-}
+% Report our version number in the log file.
+\startluacode
+    -- Get the distribution details and a logging handle.
+    local reporter = logs.reporter("distribution")
+    local details = resolvers.getdetails()
 
-% MkIV won't load MkXL files, but we need m-texlive.mkxl for the filename cache
-% code to be loaded. Until a MkIV file is added, let's load the MkXL file and
-% hope for no errors.
-\doifnotmode{lmtx}{
-    \doifnotfile{m-texlive.mkiv}{
-        \input{sys:///m-texlive.mkxl}
-    }
-}
+    -- Print the header information.
+    reporter()
+    reporter("This installation of ConTeXt is *NOT* provided by the ConTeXt Team; see below for details.")
+
+    -- Print the distribution and package version information.
+    reporter("Distribution name: %s %s",
+        details.private.distribution_name, -- "TeX Live"
+        details.private.distribution_version -- "2026"
+    )
+    reporter(
+        "Package version:   %s %s",
+        tokens.getters.macro("contextversion"), -- "2026.02.19 11:49"
+        details.private.package_revision -- "A"
+    )
+
+    -- If the installation has been further modified from the original TeX Live
+    -- distribution, also print the version of the TeX Live distribution it was
+    -- derived from.
+    if details.private.distribution_name ~= "TeX Live" then
+        reporter("Derived from:      %s", details.private.derived_from) -- "TeX Live (2026-02-19 11:49 A)"
+    end
+
+    -- Print the engine version information, since this can sometimes get
+    -- out-of-sync with the ConTeXt macro (.tex) version.
+    local engine_name, engine_version = status.banner:match(
+        "This is ([^%s,]*).*[Vv]ersion (%S*)"
+    )
+    reporter(
+        "Engine version:    %s %s (%s %d)",
+        engine_name, engine_version, os.platform, status.development_id
+    )
+
+    -- Tell people where they should report issues so that they don't bother
+    -- the ConTeXt Team with issues that are actually my fault :).
+    reporter("Report issues to:  %s", details.url)
+
+    -- Print the footer information.
+    reporter()
+\stopluacode
 
 % Set the default paper size
 \readsysfile{context-papersize.tex}{}{}
