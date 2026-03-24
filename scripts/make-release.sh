@@ -79,9 +79,6 @@ testing="$root/testing/"
 # Where the build scripts are located.
 scripts="$root/scripts/"
 
-# A staging area for patched files.
-patched="$root/patched-files/"
-
 
 ##################
 ### Versioning ###
@@ -164,31 +161,6 @@ mkdir -p "$testing/"
 # The legacy source folder is where we'll find the original MkII files.
 mkdir -p "$legacy_source/"
 
-# A staging area for patched files.
-mkdir -p "$root/patched-files/"
-
-
-###############
-### Patches ###
-###############
-
-# We occasionally need to apply a few patches to the ConTeXt source code to make
-# it work better with TeX Live. In general, patching the source code should be
-# considered a last resort, so any patches here should be for short-term use
-# only.
-
-# Temporary workaround to prevent the
-#
-#     mtxrun          | unknown script 'mtx-context.lua' or 'mtx-mtx-context.lua'
-#
-# error from happening if no filename database is present.
-cp "$source/texmf-context/scripts/context/lua/mtxrun.lua" \
-    "$patched/mtxrun.lua"
-
-sed -i \
-    -e 's/environment.argument("autogenerate")/true/' \
-    "$patched/mtxrun.lua"
-
 
 ################
 ### Binaries ###
@@ -243,7 +215,7 @@ cp -a "$staging/context.bin/windows/luametatex.exe" \
 cp -a "$staging/context.bin/windows/luametatex.exe" \
     "$staging/context.bin/windows/context.exe"
 
-cp -a "$patched/mtxrun.lua" \
+cp -a "$source/texmf-context/scripts/context/lua/mtxrun.lua" \
     "$staging/context.bin/windows/mtxrun.lua"
 
 cp -a "$source/texmf-context/scripts/context/lua/context.lua" \
@@ -383,10 +355,6 @@ cp -a "$source/texmf-context/scripts/context/lua/" \
 # tlmgr handles this itself, we'll remove these scripts so that users don't
 # accidentally break their ConTeXt installation.
 rm "$staging/context.tds/scripts/context/lua/mtx-install"{,-modules}.lua
-
-# Install the patched "mtxrun.lua" script.
-cp "$patched/mtxrun.lua" \
-    "$staging/context.tds/scripts/context/lua/mtxrun.lua"
 
 
 ###########
@@ -752,14 +720,28 @@ cp "$staging/mptopdf.tds/doc/context/scripts/mkii/mptopdf.man" \
 
 
 ###############
-### Cleanup ###
+### Patches ###
 ###############
 
 # Some files have \r\n line endings, so let's fix them up.
-find "$staging/" -type f -print0 | xargs -0 dos2unix --quiet --safe > /dev/null 2>&1
+find "$staging/" -type f -print0 | \
+    xargs -0 dos2unix --quiet --safe > /dev/null 2>&1
 
 # Remove any empty folders that were created by the packaging script.
 find "$staging/" -type d -empty -delete
+
+
+find "$staging/context.bin/" -print0 | \
+    xargs -0
+
+# Temporary workaround to prevent the
+#
+#     mtxrun          | unknown script 'mtx-context.lua' or 'mtx-mtx-context.lua'
+#
+# error from happening if no filename database is present.
+find "$staging" -name 'mtxrun.lua' -print0 | \
+    xargs -0 sed -i \
+    -e 's/environment.argument("autogenerate")/true/'
 
 
 #################
