@@ -126,7 +126,7 @@ return {
 
     -- Metadata used to identify this distribution of ConTeXt.
     details = {
-        name = distribution_name .. distribution_version,
+        name = ("%s %s"):format(distribution_name, distribution_version),
         url = distribution_url,
         version = package_revision,
         comment = "Based off of TeX Live (@@full_version@@)",

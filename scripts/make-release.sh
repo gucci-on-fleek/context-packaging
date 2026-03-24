@@ -356,6 +356,15 @@ cp -a "$source/texmf-context/scripts/context/lua/" \
 # accidentally break their ConTeXt installation.
 rm "$staging/context.tds/scripts/context/lua/mtx-install"{,-modules}.lua
 
+# So that users don't get confused by the missing scripts, we'll replace them
+# with a wrapper that tells them to use "tlmgr" instead.
+cp -a "$packaging/mtx-use-tlmgr.lua" \
+    "$staging/context.tds/scripts/context/lua/mtx-use-tlmgr.lua"
+
+echo 'dofile(resolvers.findfile("mtx-use-tlmgr", "scripts"))' | \
+    tee "$staging/context.tds/scripts/context/lua/mtx-install"{,-modules}.lua \
+    > /dev/null
+
 
 ###########
 ### TeX ###
