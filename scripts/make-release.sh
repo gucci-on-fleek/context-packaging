@@ -748,7 +748,7 @@ find "$staging/context.bin/" -print0 | \
 #     mtxrun          | unknown script 'mtx-context.lua' or 'mtx-mtx-context.lua'
 #
 # error from happening if no filename database is present.
-find "$staging" -name 'mtxrun.lua' -print0 | \
+find "$staging" -type f -name 'mtxrun.lua' -print0 | \
     xargs -0 sed -i \
     -e 's/environment.argument("autogenerate")/true/'
 
