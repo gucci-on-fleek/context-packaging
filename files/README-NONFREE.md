@@ -14,11 +14,15 @@ guidelines](https://tug.org/texlive/pkgcontrib.html). These files are
 not required for a functioning ConTeXt installation, and as such, they
 have been removed from the main TeX Live ConTeXt package (`context`).
 
-Most of these files are support files for non-free fonts; the remainder
-of the files have licenses preventing modification. It would be prudent
-to verify the licenses for each individual file before redistributing
-them or using them commercially, although as far as I'm aware, this is
-permitted for all files included here.
+Most of these files are support files for non-free fonts ([TeX Live
+requirement 2](https://tug.org/texlive/pkgcontrib.html#requirements)); a
+few files are manuals without available source files ([requirement
+3](https://tug.org/texlive/pkgcontrib.html#requirements)); the remainder
+of the files have licenses preventing modification ([requirement
+1](https://tug.org/texlive/pkgcontrib.html#requirements)). It would be
+prudent to verify the licenses for each individual file before
+redistributing them or using them commercially, although as far as I'm
+aware, this is permitted for all files included here.
 
 All of these files are available in the `context-nonfree` package
 available from either [TLContrib](https://contrib.texlive.info/) or from
