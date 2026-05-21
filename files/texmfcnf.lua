@@ -4,9 +4,50 @@
 -- SPDX-FileCopyrightText: 2024 Hans Hagen
 -- SPDX-FileCopyrightText: 2026 Max Chernoff
 
+-- Introduction
+-- ============
+--
+-- This file is used to configure ConTeXt's runtime behaviour, and most
+-- importantly to tell ConTeXt where to find its files. This file is **not**
+-- used by LuaLaTeX, Plain LuaTeX, or OpTeX, and is **only** used by the ConTeXt
+-- format and engine:
+--
+--     - https://www.ctan.org/pkg/context
+--     - https://wiki.contextgarden.net/Introduction
+--     - https://www.pragma-ade.nl/
+--
 -- Note that this file will be overwritten on upgrades, so users should place
--- any modifications in another location!
-
+-- any modifications in another location! Run "mtxrun --configurations" to see
+-- the full list of where ConTeXt searches for configuration files.
+--
+-- There is no documentation on the format and available parameters for this
+-- file; the comments here are currently the best summary of the various
+-- options. Should you have any questions, please feel free to open an issue on
+-- GitHub, or ask on the TeX Live or ConTeXt mailing lists.
+--
+-- If you have configured this file correctly, running the following command
+--
+--     $ context --global welcome-to-context
+--
+-- should create a PDF named "welcome-to-context.pdf" in the current directory
+-- containing the text "welcome to context lmtx". Furthermore, running the
+-- following command
+--
+--     $ context --luatex --global welcome-to-context
+--
+-- should create a PDF with the same name, but instead with the contents
+-- "Welcome to ConTeXt MkIV". If either of these commands fails or gives
+-- unexpected output, then your configuration is incorrect.
+--
+-- (Aside: These comments are all written by the TeX Live maintainer, and are
+-- not from the original ConTeXt Standalone Distribution. So some of these
+-- comments are likely incorrect; if you notice any mistakes, please let me know
+-- on GitHub rather than reporting to the upstream ConTeXt developers.)
+--
+--
+-- Variables
+-- =========
+--
 -- It is recommended that downstream distributors only modify the variables in
 -- the following section (although you can modify any other section if you know
 -- what you are doing).
@@ -16,7 +57,7 @@
 -- Information about who provided this installation of ConTeXt. If you modify
 -- this file (or any of the other ConTeXt files) and redistribute these changes,
 -- you should also change this value to something appropriate for your
--- distribution.
+-- distribution. Examples: "Debian", "Arch Linux", "Fedora", "homebrew", etc.
 local distribution_name = "TeX Live"
 
 -- A URL where users can find more information about this distribution of
@@ -112,6 +153,14 @@ local allowed_programs = table.concat({
     "texosquery-jre8",
 }, ",")
 --- END RECOMMENDED MODIFICATIONS SECTION ---
+
+-- If you need to modify any of the variables past this point, please let me
+-- know so that I can add them to the recommended modifications section above
+-- along with some instructive comments. That being said, if you are an ordinary
+-- user (and not a distro maintainer), feel free to experiment with any of the
+-- variables below; the worst that can happen is that ConTeXt will fail to run,
+-- but you can always fix that by reverting your changes (and possibly clearing
+-- the caches if things get really messed up).
 
 return {
     -- Metadata about this configuration file. (Copied from the original
