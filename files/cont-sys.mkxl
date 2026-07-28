@@ -56,6 +56,9 @@
 
     -- Print the footer information.
     reporter()
+
+    -- Allow loading all packages
+    environment.arguments.fragile = true
 \stopluacode
 
 % Set the default paper size
