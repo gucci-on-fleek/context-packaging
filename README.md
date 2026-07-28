@@ -77,7 +77,7 @@ Architecture
 1. [Every
    day](https://github.com/gucci-on-fleek/maxchernoff.ca/blob/master/tex/.config/systemd/user/update-texlive.timer),
    my server [updates its standalone ConTeXt
-   installation](https://github.com/gucci-on-fleek/maxchernoff.ca/blob/master/usrlocal/bin/update-context.sh).
+   installation](https://github.com/gucci-on-fleek/maxchernoff.ca/blob/master/usr/local/bin/update-context.sh).
 
 2. Afterwards, [the `daily-check` workflow in this
    repository][daily-check.yaml] runs. [It extracts the
