@@ -1052,7 +1052,7 @@ mtxrun --generate > /dev/null
 context --make > /dev/null
 
 # Finally, we'll run ConTeXt on a test file.
-cp -a "/root/make-font-cache/context-cache.tex" \
+cp -a "/opt/make-font-cache/context-cache.tex" \
     "$testing/tests/context-cache.tex"
 
 context context-cache.tex > /dev/null || \
